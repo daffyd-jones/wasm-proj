@@ -8,6 +8,7 @@ use player::Player;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
+mod connect;
 
 use wasm_bindgen::prelude::*;
 
