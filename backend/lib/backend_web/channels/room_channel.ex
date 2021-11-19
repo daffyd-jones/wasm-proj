@@ -1,8 +1,10 @@
 defmodule BackendWeb.RoomChannel do
   use BackendWeb, :channel
+  alias Backend.PlayerSupervisor
 
   @impl true
   def join("room:lobby", payload, socket) do
+    PlayerSupervisor.start_player(socket.join_ref)
     {:ok, socket}
   end
 
