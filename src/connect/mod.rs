@@ -1,11 +1,14 @@
 //! Handles data modeling and network connections for the client.
 
+mod serde_room;
+
+// TODO: Documentation
+// TODO: Testing
+
 use std::borrow::Cow;
 
-use either::{Either, Left, Right};
-use lazy_static::lazy_static;
-use regex::Regex;
-use serde::{Deserialize, Serialize, Serializer};
+use either::Either;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Event<'a, 'b, T> {
@@ -24,6 +27,7 @@ impl<'a, 'b, T> Event<'a, 'b, T> {}
 #[serde(untagged)]
 pub enum Topic<'a> {
     Phoenix,
+    #[serde(with = "serde_room")]
     #[serde(borrow)]
     Room(Cow<'a, str>),
 }
