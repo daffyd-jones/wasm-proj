@@ -1,6 +1,6 @@
 defmodule BackendWeb.RoomChannel do
   use BackendWeb, :channel
-  alias Backend.{PlayerSupervisor, Player}
+  alias Backend.{State, PlayerSupervisor, Player}
   
   # Ideally, the server should pulse at 60fps so it only sends one
   # update for each client BUT WE DON'T GOT TIME FOR THAT.
@@ -9,7 +9,7 @@ defmodule BackendWeb.RoomChannel do
   def join("room:lobby", payload, socket) do
     %{"uuid" => uuid} = payload
     
-    case PlayerSupervisor.start_player(uuid) do
+    case PlayerSupervisor.player_join(uuid) do
       {:ok, _} ->
         # Send self a message because we can't broadcast
         # before the socket fully joins
@@ -37,10 +37,15 @@ defmodule BackendWeb.RoomChannel do
   @impl true
   def handle_in("inspect", _payload, socket) do
     state = Player.inspect(socket.assigns.uuid)
-
     {:reply, {:ok, state}, socket}
   end
-  
+
+  @impl true
+  def handle_in("inspect_all", _payload, socket) do
+    plr_states = PlayerSupervisor.inspect_all()
+    {:reply, {:ok, plr_states}, socket}
+  end
+
   @impl true
   def handle_in("update_pos", payload, socket) do
     %{"new_pos" => new_pos} = payload
