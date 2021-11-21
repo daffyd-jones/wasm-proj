@@ -24,13 +24,11 @@ defmodule Backend.Player do
     {:global, uuid}
   end
 
-  def inspect(uuid) when is_int(uuid) do
+  def inspect(uuid) when is_integer(uuid) do
     GenServer.call(name(uuid), :inspect)
   end
 
-  def inspect(pid) do
-    GenServer.call(pid, :inspect)
-  end
+  def inspect(pid), do: GenServer.call(pid, :inspect)
 
   def update_pos(uuid, new_pos) do
     GenServer.cast(name(uuid), {:update_pos, new_pos})
