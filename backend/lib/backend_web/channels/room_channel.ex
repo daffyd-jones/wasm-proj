@@ -9,7 +9,7 @@ defmodule BackendWeb.RoomChannel do
   def join("room:lobby", payload, socket) do
     %{"uuid" => uuid} = payload
     
-    case PlayerSupervisor.player_join(uuid) do
+    case PlayerSupervisor.start_player(uuid) do
       {:ok, _} ->
         # Send self a message because we can't broadcast
         # before the socket fully joins
