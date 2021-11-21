@@ -5,9 +5,12 @@ defmodule Backend.Player do
   # Structs are named after the module they are in
   # so we have to create another module
   defmodule State do
-    @derive {Jason.Encoder, only: [:uuid, :pos, :lives]}
-    defstruct uuid: nil,
+    @derive {Jason.Encoder, except: []}
+    defstruct name: "",
+              uuid: nil,
               pos: %{x: 0, y: 0},
+              bombs: 10,
+              power: 10,
               lives: 3
   end
 
@@ -21,8 +24,12 @@ defmodule Backend.Player do
     {:global, uuid}
   end
 
-  def inspect(uuid) do
+  def inspect(uuid) when is_int(uuid) do
     GenServer.call(name(uuid), :inspect)
+  end
+
+  def inspect(pid) do
+    GenServer.call(pid, :inspect)
   end
 
   def update_pos(uuid, new_pos) do
