@@ -11,7 +11,7 @@ defmodule Backend.Player do
               pos: %{x: 0, y: 0},
               bombs: 10,
               power: 10,
-              lives: 3
+              alive: true
   end
 
   ### Public API ###
