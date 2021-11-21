@@ -1,39 +1,32 @@
 //! Handles data modeling and network connections for the client.
 
-mod serde_room;
+#[cfg(test)]
+mod test;
 
 // TODO: Documentation
 // TODO: Testing
 
-use std::borrow::Cow;
-
-use either::Either;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-// TODO: Document these especially!
-
-pub type TopicOrStr<'a> = Either<Topic<'a>, &'a str>;
-pub type EventTypeOrStr<'a> = Either<EventType, &'a str>;
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Event<'a, 'b, T> {
-    #[serde(with = "either::serde_untagged", borrow)]
-    topic: TopicOrStr<'a>,
-    #[serde(with = "either::serde_untagged", borrow)]
-    event: EventTypeOrStr<'b>,
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct Event<'a, T> {
+    topic: &'a str,
+    event: EventType,
     payload: T,
+    // Warning! Deserializing will expect a string and nothing but a string!
+    // Unless it's null.
     #[serde(rename = "ref")]
-    reference: Uuid,
+    reference: Option<Uuid>,
 }
 
-impl<'a, 'b, T> Event<'a, 'b, T> {
-    pub fn new(topic: TopicOrStr<'a>, event: EventTypeOrStr<'b>, payload: T) -> Self {
+impl<'a, T> Event<'a, T> {
+    pub fn new(topic: &'a str, event: EventType, payload: T) -> Self {
         Event {
             topic,
             event,
             payload,
-            reference: Uuid::new_v4(),
+            reference: Some(Uuid::new_v4()),
         }
     }
 
@@ -42,17 +35,7 @@ impl<'a, 'b, T> Event<'a, 'b, T> {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
-#[serde(untagged)]
-pub enum Topic<'a> {
-    Phoenix,
-    #[serde(with = "serde_room")]
-    #[serde(borrow)]
-    Room(Cow<'a, str>),
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub enum EventType {
     Heartbeat,
@@ -65,4 +48,19 @@ pub enum EventType {
     PhoenixError,
     #[serde(rename = "phx_close")]
     PhoenixClose,
+    Inspect,
+    #[serde(rename = "new_plr")]
+    NewPlayer,
+    UpdatePos,
+    Ping,
+    #[serde(other)]
+    Unknown,
+}
+
+pub fn to_topic_pair(topic: &str, subtopic: &str) -> String {
+    format!("{}:{}", topic, subtopic)
+}
+
+pub fn from_topic_pair(topic_pair: &str) -> Option<(&str, &str)> {
+    topic_pair.split_once(":")
 }
