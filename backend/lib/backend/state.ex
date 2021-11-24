@@ -2,8 +2,36 @@ defmodule Backend.State do
   use GenServer
   alias Backend.{PlayerSupervisor, Player, Grid}
   
-  @width 3
-  @height 3
+  defmodule Grids do
+    @width 3
+    @height 3
+
+    defstruct blocks: %{},
+              players: %{},
+              bombs: %{}
+
+    def new() do
+      %Grids{
+        blocks: Grid.new(@width, @height),
+        players: Grid.new(@width, @height),
+        bombs: Grid.new(@width, @height),
+      }
+    end
+  end
+  
+  defimpl Jason.Encoder, for: Grids do
+    def encode(map, opts) do
+      # In this case, our grids are nested maps.
+      # We want to convert them so the parser
+      # can return a 2D array in JSON
+      converted_map = map
+                      |> Map.from_struct()
+                      |> Map.to_list()
+                      |> Enum.map(fn {k, v} -> {k, Grid.to_list(v)} end)
+                      |> Map.new()
+      Jason.Encode.map(converted_map, opts)
+    end
+  end
   
   ### Public API ###
 
@@ -23,13 +51,13 @@ defmodule Backend.State do
 
   @impl true
   def init(_) do
-    state = %{
-      blocks: Grid.new(@width, @height),
-      players: Grid.new(@width, @height),
-      bombs: Grid.new(@width, @height)
-    }
+    # state = %{
+    #   blocks: Grid.new(@width, @height),
+    #   players: Grid.new(@width, @height),
+    #   bombs: Grid.new(@width, @height)
+    # }
 
-    {:ok, state}
+    {:ok, Grids.new()}
   end
 
   def handle_call({:set, grid, x, y, val}, _from, state) do
