@@ -16,7 +16,7 @@ defmodule Backend.Application do
       BackendWeb.Endpoint,
       # Start a worker by calling: Backend.Worker.start_link(arg)
       # {Backend.Worker, arg}
-      # {Backend.GameState, nil},
+      {Backend.State, nil},
       {Backend.PlayerSupervisor, nil}
     ]
 
