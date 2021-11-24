@@ -14,11 +14,11 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 pub enum Cell {
     White = 0, // Dead
     Black = 1, // Alive
-		AntUpB = 2,
-		AntDwnB = 3,
-		AntLftB = 4,
-		AntRgtB = 5,
-		AntUpW = 6,
+	AntUpB = 2,
+	AntDwnB = 3,
+	AntLftB = 4,
+	AntRgtB = 5,
+	AntUpW = 6,
     AntDwnW = 7,
     AntLftW = 8,
     AntRgtW = 9,
