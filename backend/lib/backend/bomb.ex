@@ -4,6 +4,6 @@ defmodule Backend.Bomb do
 
   @derive {Jason.Encoder, exclude: []}
   defstruct pos: %{x: 0, y: 0},
-            power: 0,
+            power: 0
             
 end
