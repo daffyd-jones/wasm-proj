@@ -46,6 +46,16 @@ defmodule BackendWeb.RoomChannel do
     {:reply, {:ok, plr_states}, socket}
   end
 
+  # Still unclear on how game stuff works still
+  # I presume that the player will send its 
+  # entire internal state to the server
+  @impl true
+  def handle_in("next_turn", payload, socket) do
+    State.next_turn(payload)   
+    # just gonna return payload for now
+    {:reply, {:ok, payload}, socket}
+  end
+
   @impl true
   def handle_in("update_pos", payload, socket) do
     %{"new_pos" => new_pos} = payload

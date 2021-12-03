@@ -39,6 +39,10 @@ defmodule Backend.State do
     GenServer.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
+  def next_turn(client_state) do
+    GenServer.call(__MODULE__, {:next_turn, client_state})
+  end
+ 
   def get() do
     GenServer.call(__MODULE__, :get)
   end
@@ -51,18 +55,16 @@ defmodule Backend.State do
 
   @impl true
   def init(_) do
-    # state = %{
-    #   blocks: Grid.new(@width, @height),
-    #   players: Grid.new(@width, @height),
-    #   bombs: Grid.new(@width, @height)
-    # }
-
     {:ok, Grids.new()}
+  end
+
+  def handle_call({:next_turn, client_state}, _from, state) do
+    IO.inspect(client_state)
+    {:reply, state, state}
   end
 
   def handle_call({:set, grid, x, y, val}, _from, state) do
     new_state = state[grid][x][y] |> put_in(val)
-    #new_state = state |> Map.put(grid, new_grid)
     {:reply, new_state, new_state}
   end
   
