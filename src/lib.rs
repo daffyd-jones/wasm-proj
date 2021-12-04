@@ -26,6 +26,14 @@ pub enum Cell {
 #[wasm_bindgen]
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum BombGrid {
+    Empty = 0,
+    Occupied = 1
+}
+
+#[wasm_bindgen]
+#[repr(u8)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum InputType {
     Up = 0,
     Down = 1,
@@ -40,6 +48,7 @@ pub struct Universe {
     height: u32,
     cells: Vec<Cell>,
     bombs_vec: Vec<BombStruct>,
+    bombs_locations: Vec<BombGrid>,
     players_vec: Vec<Player>,
 }
 
@@ -203,6 +212,12 @@ impl Universe {
                 }
             })
             .collect();
+
+        let bombs_locations = (0..width * height)
+            .map(|i| {
+                BombGrid::Empty
+            })
+            .collect();
         
         let bombs_vec: Vec<BombStruct> = Vec::new();
         let players_vec: Vec<Player> = Vec::new();
@@ -212,6 +227,7 @@ impl Universe {
             height,
             cells,
             bombs_vec,
+            bombs_locations,
             players_vec
         }
     }
