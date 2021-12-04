@@ -1,4 +1,8 @@
 mod utils;
+mod bomb;
+use bomb::BombStruct;
+mod player;
+use player::Player;
 
 use wasm_bindgen::prelude::*;
 
@@ -35,6 +39,8 @@ pub struct Universe {
     width: u32,
     height: u32,
     cells: Vec<Cell>,
+    bombs_vec: Vec<BombStruct>,
+    players_vec: Vec<Player>,
 }
 
 impl Universe {
@@ -111,6 +117,7 @@ impl Universe {
 
 #[wasm_bindgen]
 impl Universe {
+    // TODO: where do we create a new player?
     pub fn tick(&mut self, input: InputType) {
         let mut next = self.cells.clone();
 
@@ -139,6 +146,21 @@ impl Universe {
         }
 
         self.cells = next;
+
+        // tick down bombs
+        for b in self.bombs_vec.iter_mut() {
+            b.count_down();
+            if b.timer() == 0 {
+                let affected_tiles = b.explosion_tiles();
+                // TODO: check players positions and call their lose_hp() if they're hit
+                // TODO: check walls (julie working on this?)
+            }
+        }
+
+        // if input type is bomb
+        if input == InputType::Bomb {
+            // TODO: get player id and position to create new bomb and push to bombs_vec
+        }
     }
 
     // ...
@@ -146,6 +168,7 @@ impl Universe {
 
 
 use std::fmt;
+use crate::InputType::Bomb;
 
 impl fmt::Display for Universe {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -180,11 +203,16 @@ impl Universe {
                 }
             })
             .collect();
+        
+        let bombs_vec: Vec<BombStruct> = Vec::new();
+        let players_vec: Vec<Player> = Vec::new();
 
         Universe {
             width,
             height,
             cells,
+            bombs_vec,
+            players_vec
         }
     }
 
