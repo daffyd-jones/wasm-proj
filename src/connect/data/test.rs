@@ -1,8 +1,10 @@
 use std::collections::HashMap;
 
+use wasm_bindgen_test::*;
+
 use super::*;
 
-#[test]
+#[wasm_bindgen_test]
 fn test_basic_event_de() {
     let data = r#"{"topic": "room:lobby", "event": "phx_join", "payload": {}, "ref": "00000000-0000-0000-0000-000000000000"}"#;
     let expected: Event<HashMap<&str, &str>> = Event {
