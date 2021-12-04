@@ -2,9 +2,6 @@ defmodule BackendWeb.RoomChannel do
   use BackendWeb, :channel
   alias Backend.{State, PlayerSupervisor, Player}
   
-  # Ideally, the server should pulse at 60fps so it only sends one
-  # update for each client BUT WE DON'T GOT TIME FOR THAT.
-
   @impl true
   def join("room:lobby", payload, socket) do
     %{"uuid" => uuid} = payload
