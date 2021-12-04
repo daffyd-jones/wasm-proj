@@ -14,10 +14,12 @@ defmodule Backend.Application do
       {Phoenix.PubSub, name: Backend.PubSub},
       # Start the Endpoint (http/https)
       BackendWeb.Endpoint,
-      # Start a worker by calling: Backend.Worker.start_link(arg)
-      # {Backend.Worker, arg}
+      
       {Backend.State, nil},
-      {Backend.PlayerSupervisor, nil}
+      # Important to start the player supervisor first
+      # so the PlayerSequence GenServer can pull from it
+      {Backend.PlayerSupervisor, nil},
+      {Backend.PlayerSequence, nil}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
