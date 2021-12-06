@@ -10,9 +10,9 @@
   // power: power level of bombs (how many tiles from center it explodes)
   // alive: is player alive
   // hp: how many lives a player has left
-
+#[derive(Copy, Clone)]
 pub struct Player {
-  name: String,
+  // name: String,
   id: i32,
   x: i32, 
   y: i32,
@@ -24,8 +24,8 @@ pub struct Player {
 impl Player {
   
   // constructor for new players
-  pub fn new(name: String, id: i32, x: i32, y: i32, bombs: i32) -> Player {
-    Player {name: name, id: id, x: x, y: y, bombs: bombs, alive: true, hp: 5}
+  pub fn new(id: i32, x: i32, y: i32, bombs: i32) -> Player {
+    Player {id: id, x: x, y: y, bombs: bombs, alive: true, hp: 5}
   }
 
   // move character to specified coordinates.
@@ -83,6 +83,18 @@ impl Player {
 
   pub fn position(self) -> (i32, i32) {
     return (self.x, self.y);
+  }
+
+  pub fn space(self, x: i32, y: i32) -> bool {
+    return (self.x == x) && (self.y == y)
+  }
+
+  pub fn x(self) -> i32 {
+    return self.x;
+  }
+
+  pub fn y(self) -> i32 {
+    return self.y;
   }
 
   pub fn id(self) -> i32 {

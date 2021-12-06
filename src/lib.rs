@@ -156,15 +156,31 @@ impl Universe {
 
         self.cells = next;
 
+        let mut plyrs = self.players_vec.clone();
+
         // tick down bombs
         for b in self.bombs_vec.iter_mut() {
             b.count_down();
             if b.timer() == 0 {
                 let affected_tiles = b.explosion_tiles();
                 // TODO: check players positions and call their lose_hp() if they're hit
+                for (x, y) in affected_tiles.iter() {
+                    // self.players_vec = self.players_vec.iter()
+                    //     .map(|&i| if i.space(x, y) {i.lose_hp()}).collect();
+                    for i in 0..plyrs.len() {
+                        let px = &plyrs[i].x();
+                        let py = &plyrs[i].y();
+                        if (px, py) == (x, y) {
+                            plyrs[i].lose_hp();
+                        }
+                    }
+                } 
+                
                 // TODO: check walls (julie working on this?)
             }
         }
+        
+        self.players_vec = plyrs;
 
         // if input type is bomb
         if input == InputType::Bomb {
