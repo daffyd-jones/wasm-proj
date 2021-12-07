@@ -1,4 +1,4 @@
-const thingy = document.getElementById("thingu");
+const thingy = document.getElementById("thingy");
 const buttons = document.getElementById("buttons");
 
 const sendMsg = (socket, event, payload) => {
@@ -27,7 +27,9 @@ for (i = 0; i < 4; i++) {
         const msg = JSON.parse(e.data);
         const payload = msg.payload;
 
-        console.log(payload);
+        if (payload.status && payload.status === "new_turn") {
+            thingy.innerText = `Player ${payload.uuid}'s turn`;
+        }
     }
 
     b.onclick = (e) => {
