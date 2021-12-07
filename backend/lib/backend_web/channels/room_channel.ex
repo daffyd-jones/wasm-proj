@@ -7,7 +7,7 @@ defmodule BackendWeb.RoomChannel do
     %{"uuid" => uuid} = payload
     
     case PlayerSupervisor.start_player(uuid) do
-      {:ok, _} ->
+      :ok ->
         # Send self a message because we can't broadcast
         # before the socket fully joins
         send(self(), :after_join)
@@ -15,7 +15,8 @@ defmodule BackendWeb.RoomChannel do
         # with the newly created Player process
         {:ok, assign(socket, :uuid, uuid)}
       err ->
-        err
+        IO.inspect(err)
+        {:error, err}
     end
   end
   
@@ -55,6 +56,10 @@ defmodule BackendWeb.RoomChannel do
 
   @impl true
   def handle_in("update_pos", payload, socket) do
+    # Ignore the logging for update_pos since it
+    # spams IEX
+    Logger.disable(self())
+    
     %{"new_pos" => new_pos} = payload
     Player.update_pos(socket.assigns.uuid, new_pos)
    
