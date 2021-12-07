@@ -18,7 +18,9 @@ defmodule Backend.PlayerSequence do
 
   def current_plr(), do: GenServer.call(__MODULE__, :current_plr)
 
-  def next_plr(), do: GenServer.call(__MODULE__, :next_plr)
+  def get_next_plr(), do: GenServer.call(__MODULE__, :get_next_plr)
+
+  def save_next_plr(), do: GenServer.call(__MODULE__, :save_next_plr)
 
   def add_plr(uuid), do: GenServer.cast(__MODULE__, {:add_plr, uuid})
   
@@ -44,21 +46,32 @@ defmodule Backend.PlayerSequence do
   def handle_call(:current_plr, _from, state) do
     {:reply, state.current, state}
   end
-
-  @impl true
-  def handle_call(:next_plr, _from, state) do
-    current = case state.current do
-      nil -> state.players |> Enum.at(0)
+  
+  defp get_new_current(state) do
+    case state.current do
+      nil ->
+        state.players |> Enum.at(0)
       _ ->
         cur_i = state.players
-            |> Enum.find_index(fn x -> x == state.current end)
+                |> Enum.find_index(fn x -> x == state.current end)
         next_i = rem(cur_i + 1, state.players |> Enum.count())
         state.players |> Enum.at(next_i)
     end
-        
+  end
+
+  @impl true
+  def handle_call(:get_next_plr, _from, state) do
+    new_current = get_new_current(state)
+    {:reply, new_current, state}
+  end
+
+  @impl true
+  def handle_call(:save_next_plr, _from, state) do
+    new_current = get_new_current(state)
+
     new_state = %PlayerSequence{
       state | 
-      current: current
+      current: new_current
     }
 
     {:reply, new_state.current, new_state}
