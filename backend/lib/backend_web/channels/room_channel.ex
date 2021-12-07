@@ -1,6 +1,11 @@
 defmodule BackendWeb.RoomChannel do
   use BackendWeb, :channel
-  alias Backend.{State, PlayerSupervisor, Player}
+  alias Backend.{
+    State,
+    PlayerSupervisor,
+    PlayerSequence,
+    Player
+  }
   
   @impl true
   def join("room:lobby", payload, socket) do
@@ -49,9 +54,16 @@ defmodule BackendWeb.RoomChannel do
   # entire internal state to the server
   @impl true
   def handle_in("next_turn", payload, socket) do
-    State.next_turn(payload)   
-    # just gonna return payload for now
-    {:reply, {:ok, payload}, socket}
+    # Payload is just %{"uuid" => whatever} for now
+    case State.next_turn(payload) do
+      :not_your_turn -> nil
+      uuid -> 
+        broadcast_from socket, "new_turn",
+          # sending status for testing purposes
+          %{status: :new_turn, uuid: uuid}
+    end
+    
+    {:reply, :ok, socket}
   end
 
   @impl true

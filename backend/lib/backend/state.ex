@@ -1,6 +1,11 @@
 defmodule Backend.State do
   use GenServer
-  alias Backend.{PlayerSupervisor, Player, Grid}
+  alias Backend.{
+    PlayerSequence,
+    PlayerSupervisor,
+    Player,
+    Grid
+  }
   
   defmodule Grids do
     @width 3
@@ -59,8 +64,17 @@ defmodule Backend.State do
   end
 
   def handle_call({:next_turn, client_state}, _from, state) do
-    IO.inspect(client_state)
-    {:reply, state, state}
+    %{"uuid" => uuid} = client_state
+
+    case PlayerSequence.get_next_plr() do
+      ^uuid ->
+        IO.inspect("It is #{uuid}'s turn")
+        PlayerSequence.save_next_plr()
+        {:reply, uuid, state}
+      _ ->
+        IO.inspect("It is not #{uuid}'s turn")
+        {:reply, :not_your_turn, state}
+    end
   end
 
   def handle_call({:set, grid, x, y, val}, _from, state) do
