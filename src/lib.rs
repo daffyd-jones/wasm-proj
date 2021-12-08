@@ -4,6 +4,8 @@ mod bomb;
 use bomb::BombStruct;
 mod player;
 use player::Player;
+mod wall;
+use wall::WallStruct;
 
 use wasm_bindgen::prelude::*;
 
@@ -51,6 +53,7 @@ pub struct Universe {
     bombs_vec: Vec<BombStruct>,
     bombs_locations: Vec<BombGrid>,
     players_vec: Vec<Player>,
+    walls_vec : Vec<WallStruct>
 }
 
 impl Universe {
@@ -158,6 +161,7 @@ impl Universe {
         self.cells = next;
 
         let mut plyrs = self.players_vec.clone();
+        let mut walls = self.walls_vec.clone();
 
         // tick down bombs
         for b in self.bombs_vec.iter_mut() {
@@ -175,13 +179,23 @@ impl Universe {
                             plyrs[i].lose_hp();
                         }
                     }
+
+                    // TODO: check walls (julie working on this?)
+                    for j in 0..walls.len(){
+                        let wx = &walls[j].x();
+                        let wy = &walls[j].y();
+                        if (wx, wy) == (x, y) {
+                            walls[j].is_bombed();
+                        }
+                    }
                 } 
                 
-                // TODO: check walls (julie working on this?)
+                
             }
         }
         
         self.players_vec = plyrs;
+        self.walls_vec = walls;
 
         // if input type is bomb
         if input == InputType::Bomb {
@@ -238,6 +252,17 @@ impl Universe {
         
         let bombs_vec: Vec<BombStruct> = Vec::new();
         let players_vec: Vec<Player> = Vec::new();
+        let walls_vec: Vec<WallStruct> = Vec::new();
+
+        for i in (0..width) {
+            for j in (0.. height){
+                if (i % 2 != 0) && (j % 2 != 0) {
+                    walls_vec.push(WallStruct::new(i, j, false, true))
+                }
+            }
+        }
+
+
 
         Universe {
             width,
@@ -245,7 +270,8 @@ impl Universe {
             cells,
             bombs_vec,
             bombs_locations,
-            players_vec
+            players_vec,
+            walls_vec
         }
     }
 
