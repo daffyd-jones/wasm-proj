@@ -4,65 +4,81 @@ defmodule Backend.State do
     PlayerSequence,
     PlayerSupervisor,
     Player,
+    State,
     Grid
   }
-  
-  defmodule Grids do
-    @width 3
-    @height 3
 
-    defstruct blocks: %{},
-              players: %{},
-              bombs: %{}
+  #defmodule Grids do
+  #  @width 3
+  #  @height 3
+  #
+  #  defstruct blocks: %{},
+  #            players: %{},
+  #            bombs: %{}
+  #
+  #  def new() do
+  #    %Grids{
+  #      blocks: Grid.new(@width, @height),
+  #      players: Grid.new(@width, @height),
+  #      bombs: Grid.new(@width, @height),
+  #    }
+  #  end
+  #end
+  
+  #defimpl Jason.Encoder, for: Grids do
+  #  def encode(map, opts) do
+  #    # In this case, our grids are nested maps.
+  #    # We want to convert them so the parser
+  #    # can return a 2D array in JSON
+  #    converted_map = map
+  #                    |> Map.from_struct()
+  #                    |> Map.to_list()
+  #                    |> Enum.map(fn {k, v} -> {k, Grid.to_list(v)} end)
+  #                    |> Map.new()
+  #    Jason.Encode.map(converted_map, opts)
+  #  end
+  #end
 
-    def new() do
-      %Grids{
-        blocks: Grid.new(@width, @height),
-        players: Grid.new(@width, @height),
-        bombs: Grid.new(@width, @height),
-      }
-    end
-  end
-  
-  defimpl Jason.Encoder, for: Grids do
-    def encode(map, opts) do
-      # In this case, our grids are nested maps.
-      # We want to convert them so the parser
-      # can return a 2D array in JSON
-      converted_map = map
-                      |> Map.from_struct()
-                      |> Map.to_list()
-                      |> Enum.map(fn {k, v} -> {k, Grid.to_list(v)} end)
-                      |> Map.new()
-      Jason.Encode.map(converted_map, opts)
-    end
-  end
-  
+  defstruct players: [],
+            bombs: [],
+            walls: []
+
   ### Public API ###
 
   def start_link(nil) do
     GenServer.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
+  def inspect() do
+    GenServer.call(__MODULE__, :inspect)
+  end
+
   def next_turn(uuid, client_state) do
     GenServer.call(__MODULE__, {:next_turn, uuid, client_state})
   end
  
-  def get() do
-    GenServer.call(__MODULE__, :get)
-  end
+  #def get() do
+  #  GenServer.call(__MODULE__, :get)
+  #end
 
-  def set(grid, x, y, val) do
-    GenServer.call(__MODULE__, {:set, grid, x, y, val})
-  end
+  #def set(grid, x, y, val) do
+  #  GenServer.call(__MODULE__, {:set, grid, x, y, val})
+  #end
 
   ### GenServer ###
 
   @impl true
   def init(_) do
-    {:ok, Grids.new()}
+    #{:ok, Grids.new()}
+    {:ok, %State{players: [], bombs: [], walls: []}}
   end
 
+  @impl true
+  def handle_call(:inspect, _from, state) do
+    {:ok, state, state}
+  end
+  
+  @impl true
   def handle_call({:next_turn, uuid, client_state}, _from, state) do
     case PlayerSequence.get_next_plr() do
       ^uuid ->
@@ -75,13 +91,14 @@ defmodule Backend.State do
     end
   end
 
-  def handle_call({:set, grid, x, y, val}, _from, state) do
-    new_state = state[grid][x][y] |> put_in(val)
-    {:reply, new_state, new_state}
-  end
+  #@impl true
+  #def handle_call({:set, grid, x, y, val}, _from, state) do
+  #  new_state = state[grid][x][y] |> put_in(val)
+  #  {:reply, new_state, new_state}
+  #end
   
-  @impl true
-  def handle_call(:get, _from, state) do
-    {:reply, state, state}
-  end
+  #@impl true
+  #def handle_call(:get, _from, state) do
+  #  {:reply, state, state}
+  #end
 end
