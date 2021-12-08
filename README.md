@@ -1,17 +1,18 @@
-wasm-proj
+# wasm-proj
 
-#####
+### To build and run the program follow these steps in sequential order
 
-index files in for-www to be added after build
+1. `wasm-pack build`
+2. `npm init wasm-app www`
+3. `cd www`
+    - Add the following line into package.json under devDependencies: <br> 
+    `"wasm-proj": "file:../pkg",`
+4. `npm install`
+5. Delete `index.html` and `index.js` in `www`
+6. Copy `index.js` and `index.html` in `for-www` folder into `www`
+7. `npm run start`
 
-````
-wasm-pack build
+The port is set to 8080
 
-````
-
-couldnt commit www/ to git
-
-
-still need to change wasm-game-of-life from imports to wasm-proj
 
  
