@@ -47,8 +47,8 @@ pub enum InputType {
 
 #[wasm_bindgen]
 pub struct Universe {
-    width: u32,
-    height: u32,
+    width: i32,
+    height: i32,
     cells: Vec<Cell>,
     bombs_vec: Vec<BombStruct>,
     bombs_locations: Vec<BombGrid>,
@@ -57,7 +57,7 @@ pub struct Universe {
 }
 
 impl Universe {
-    fn get_index(&self, row: u32, column: u32) -> usize {
+    fn get_index(&self, row: i32, column: i32) -> usize {
         (row * self.width + column) as usize
     }
 
@@ -68,11 +68,11 @@ impl Universe {
 impl Universe {
     // ...
 
-    pub fn width(&self) -> u32 {
+    pub fn width(&self) -> i32 {
         self.width
     }
 
-    pub fn height(&self) -> u32 {
+    pub fn height(&self) -> i32 {
         self.height
     }
 
@@ -113,7 +113,7 @@ impl Universe {
 impl Universe {
     // ...
 
-    fn neighbors(&self, row: u32, column: u32) -> Vec<Cell> {
+    fn neighbors(&self, row: i32, column: i32) -> Vec<Cell> {
 		let cels = self.cells.clone();
 		let mut adj_sqrs: Vec<Cell> = Vec::new();
 		let idx_u = self.get_index((row - 1) % self.height, column);
@@ -184,7 +184,7 @@ impl Universe {
                     for j in 0..walls.len(){
                         let wx = &walls[j].x();
                         let wy = &walls[j].y();
-                        if (wx, wy) == (x, y) {
+                        if (wx, wy) == (x , y) {
                             walls[j].is_bombed();
                         }
                     }
@@ -252,7 +252,10 @@ impl Universe {
         
         let bombs_vec: Vec<BombStruct> = Vec::new();
         let players_vec: Vec<Player> = Vec::new();
-        let walls_vec: Vec<WallStruct> = Vec::new();
+
+
+        // Construct the solid walls for the launch of universe
+        let mut walls_vec: Vec<WallStruct> = Vec::new();
 
         for i in 0..width {
             for j in 0.. height{

@@ -1,6 +1,7 @@
+#[derive(Copy, Clone)]
 pub struct WallStruct {
-    x: u32,
-    y: u32,
+    x: i32,
+    y: i32,
     destrctible: bool,
     alive: bool
 
@@ -9,7 +10,7 @@ pub struct WallStruct {
   impl WallStruct {
   
     // Constructor for walls
-    pub fn new(x: u32, y: u32, destrctible: bool, alive : bool) -> WallStruct {
+    pub fn new(x: i32, y: i32, destrctible: bool, alive : bool) -> WallStruct {
       WallStruct { x: x, y: y, destrctible: destrctible, alive:alive }
     }
   
@@ -19,4 +20,12 @@ pub struct WallStruct {
             self.alive = false;
         }
     }
+    pub fn x(self) -> i32 {
+        return self.x;
+      }
+    
+      pub fn y(self) -> i32 {
+        return self.y;
+      }
+
   }
