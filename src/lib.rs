@@ -53,6 +53,7 @@ pub struct Universe {
     bombs_vec: Vec<BombStruct>,
     bombs_locations: Vec<BombGrid>,
     players_vec: Vec<Player>,
+    walls_vec: Vec<WallStruct>
 }
 
 impl Universe {
@@ -112,6 +113,37 @@ impl Universe {
 impl Universe {
     // ...
 
+
+    fn occupied(&self, row: i32, col: i32) -> bool {
+        let mut bomb_check = false;
+        let mut wall_check = false;
+        let mut player_check = false;
+
+        let bombs = self.bombs_vec.clone();
+        let walls = self.walls_vec.clone();
+        let players = self.players_vec.clone();
+
+        for w in walls.iter() {
+            if w.x() == col && w.y() == row {
+                wall_check = true;
+            }
+        }
+
+        for b in bombs.iter() {
+            if b.x() == col && b.y() == row {
+                bomb_check = true;
+            }
+        }
+
+        for p in players.iter() {
+            if p.x() == col && p.y() == row {
+                player_check = true;
+            }
+        }
+        
+        return wall_check || bomb_check || player_check;
+    }
+
     // fn neighbors(&self, row: u32, column: u32) -> Vec<Cell> {
 	// 	let cels = self.cells.clone();
 	// 	let mut adj_sqrs: Vec<Cell> = Vec::new();
@@ -164,11 +196,15 @@ impl Universe {
         for p in plyrs.iter_mut() {
             if p.host() == self.host {
                 match input {
+                    InputType::Up if !self.occupied(p.x(), p.y() - 1) => p.up(),
+                    InputType::Left if !self.occupied(p.x() - 1, p.y()) => p.left(),
+                    InputType::Right if !self.occupied(p.x() + 1, p.y()) => p.right(),
+                    InputType::Down if !self.occupied(p.x(), p.y() - 1) => p.down(),
+                    InputType::Bomb => p.drop_bomb(),
                     InputType::Up => p.up(),
                     InputType::Left => p.left(),
                     InputType::Right => p.right(),
                     InputType::Down => p.down(),
-                    InputType::Bomb => p.drop_bomb(),
                 }
             }
         }
@@ -176,6 +212,7 @@ impl Universe {
         self.players_vec = plyrs;
 
         let mut plyrs = self.players_vec.clone();
+        let mut walls = self.walls_vec.clone();
 
         // tick down bombs
         for b in self.bombs_vec.iter_mut() {
@@ -193,13 +230,22 @@ impl Universe {
                             plyrs[i].lose_hp();
                         }
                     }
+                    // TODO: check walls (julie working on this?)
+                    for j in 0..walls.len(){
+                        let wx = &walls[j].x();
+                        let wy = &walls[j].y();
+                        if (wx, wy) == (x , y) {
+                            walls[j].is_bombed();
+                        }
+                    }
                 } 
                 
-                // TODO: check walls (julie working on this?)
+                
             }
         }
         
         self.players_vec = plyrs;
+        self.walls_vec = walls;
 
         // // if input type is bomb
         // if input == InputType::Bomb {
@@ -215,7 +261,7 @@ impl Universe {
 
 
 use std::fmt;
-use crate::InputType::Bomb;
+// use crate::InputType::Bomb;
 
 impl fmt::Display for Universe {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -269,6 +315,9 @@ impl Universe {
         // Construct the solid walls for the launch of universe
         let mut walls_vec: Vec<WallStruct> = Vec::new();
 
+        // let wid = width.clone();
+        // let hi = height.clone();
+
         for i in 0..width {
             for j in 0.. height{
                 if (i == 0) || j==0 || i == width || j == height{
@@ -282,12 +331,13 @@ impl Universe {
 
         Universe {
             host,
-            width,
-            height,
+            width: 32,
+            height: 32,
             cells,
             bombs_vec,
             bombs_locations,
-            players_vec
+            players_vec,
+            walls_vec
         }
     }
 

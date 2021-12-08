@@ -45,6 +45,15 @@ impl BombStruct {
     return (self.x, self.y);
   }
 
+  pub fn x(self) -> i32 {
+    return self.x;
+  }
+
+  pub fn y(self) -> i32 {
+    return self.y;
+  }
+
+
   pub fn power(self) -> i32 {
     return self.power;
   }
