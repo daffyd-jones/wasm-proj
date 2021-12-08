@@ -1,5 +1,9 @@
 mod utils;
 mod connect;
+mod bomb;
+use bomb::BombStruct;
+mod player;
+use player::Player;
 
 use wasm_bindgen::prelude::*;
 
@@ -23,6 +27,14 @@ pub enum Cell {
 #[wasm_bindgen]
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum BombGrid {
+    Empty = 0,
+    Occupied = 1
+}
+
+#[wasm_bindgen]
+#[repr(u8)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum InputType {
     Up = 0,
     Down = 1,
@@ -36,6 +48,9 @@ pub struct Universe {
     width: u32,
     height: u32,
     cells: Vec<Cell>,
+    bombs_vec: Vec<BombStruct>,
+    bombs_locations: Vec<BombGrid>,
+    players_vec: Vec<Player>,
 }
 
 impl Universe {
@@ -112,6 +127,7 @@ impl Universe {
 
 #[wasm_bindgen]
 impl Universe {
+    // TODO: where do we create a new player?
     pub fn tick(&mut self, input: InputType) {
         let mut next = self.cells.clone();
 
@@ -140,6 +156,37 @@ impl Universe {
         }
 
         self.cells = next;
+
+        let mut plyrs = self.players_vec.clone();
+
+        // tick down bombs
+        for b in self.bombs_vec.iter_mut() {
+            b.count_down();
+            if b.timer() == 0 {
+                let affected_tiles = b.explosion_tiles();
+                // TODO: check players positions and call their lose_hp() if they're hit
+                for (x, y) in affected_tiles.iter() {
+                    // self.players_vec = self.players_vec.iter()
+                    //     .map(|&i| if i.space(x, y) {i.lose_hp()}).collect();
+                    for i in 0..plyrs.len() {
+                        let px = &plyrs[i].x();
+                        let py = &plyrs[i].y();
+                        if (px, py) == (x, y) {
+                            plyrs[i].lose_hp();
+                        }
+                    }
+                } 
+                
+                // TODO: check walls (julie working on this?)
+            }
+        }
+        
+        self.players_vec = plyrs;
+
+        // if input type is bomb
+        if input == InputType::Bomb {
+            // TODO: get player id and position to create new bomb and push to bombs_vec
+        }
     }
 
     // ...
@@ -147,6 +194,7 @@ impl Universe {
 
 
 use std::fmt;
+use crate::InputType::Bomb;
 
 impl fmt::Display for Universe {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -182,10 +230,22 @@ impl Universe {
             })
             .collect();
 
+        let bombs_locations = (0..width * height)
+            .map(|i| {
+                BombGrid::Empty
+            })
+            .collect();
+        
+        let bombs_vec: Vec<BombStruct> = Vec::new();
+        let players_vec: Vec<Player> = Vec::new();
+
         Universe {
             width,
             height,
             cells,
+            bombs_vec,
+            bombs_locations,
+            players_vec
         }
     }
 

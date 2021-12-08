@@ -7,3 +7,4 @@ wasm-pack.log
 www/
 **/*.swp
 .DS_Store
+.idea/
