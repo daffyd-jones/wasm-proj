@@ -13,7 +13,7 @@
 #[derive(Copy, Clone)]
 pub struct Player {
   // name: String,
-  id: i32,
+  host: bool,
   x: i32, 
   y: i32,
   bombs: i32,
@@ -24,8 +24,8 @@ pub struct Player {
 impl Player {
   
   // constructor for new players
-  pub fn new(id: i32, x: i32, y: i32, bombs: i32) -> Player {
-    Player {id: id, x: x, y: y, bombs: bombs, alive: true, hp: 5}
+  pub fn new(host: bool, x: i32, y: i32, bombs: i32) -> Player {
+    Player {host: host, x: x, y: y, bombs: bombs, alive: true, hp: 5}
   }
 
   // move character to specified coordinates.
@@ -36,19 +36,19 @@ impl Player {
 
   // increment position of player
   // TODO: check to make sure within bounds of play
-  fn up(&mut self) {
+  pub fn up(&mut self) {
     self.move_to(self.x, self.y - 1)
   }
 
-  fn down(&mut self) {
+  pub fn down(&mut self) {
     self.move_to(self.x, self.y + 1)
   }
 
-  fn left(&mut self) {
+  pub fn left(&mut self) {
     self.move_to(self.x - 1, self.y)
   }
 
-  fn right(&mut self) {
+  pub fn right(&mut self) {
     self.move_to(self.x + 1, self.y)
   }
 
@@ -97,7 +97,7 @@ impl Player {
     return self.y;
   }
 
-  pub fn id(self) -> i32 {
-    return self.id;
+  pub fn host(self) -> bool {
+    return self.host;
   }
 }

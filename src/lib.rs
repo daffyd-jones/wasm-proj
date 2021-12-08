@@ -44,6 +44,7 @@ pub enum InputType {
 
 #[wasm_bindgen]
 pub struct Universe {
+    host: bool,
     width: u32,
     height: u32,
     cells: Vec<Cell>,
@@ -109,52 +110,68 @@ impl Universe {
 impl Universe {
     // ...
 
-    fn neighbors(&self, row: u32, column: u32) -> Vec<Cell> {
-		let cels = self.cells.clone();
-		let mut adj_sqrs: Vec<Cell> = Vec::new();
-		let idx_u = self.get_index((row - 1) % self.height, column);
-		adj_sqrs.push(cels[idx_u]);
-		let idx_l = self.get_index(row, (column - 1) % self.width);
-		adj_sqrs.push(cels[idx_l]);
-		let idx_r = self.get_index(row, (column + 1) % self.width);
-		adj_sqrs.push(cels[idx_r]);
-		let idx_d = self.get_index((row + 1) % self.height, column);
-		adj_sqrs.push(cels[idx_d]);
-		adj_sqrs
-	}
+    // fn neighbors(&self, row: u32, column: u32) -> Vec<Cell> {
+	// 	let cels = self.cells.clone();
+	// 	let mut adj_sqrs: Vec<Cell> = Vec::new();
+	// 	let idx_u = self.get_index((row - 1) % self.height, column);
+	// 	adj_sqrs.push(cels[idx_u]);
+	// 	let idx_l = self.get_index(row, (column - 1) % self.width);
+	// 	adj_sqrs.push(cels[idx_l]);
+	// 	let idx_r = self.get_index(row, (column + 1) % self.width);
+	// 	adj_sqrs.push(cels[idx_r]);
+	// 	let idx_d = self.get_index((row + 1) % self.height, column);
+	// 	adj_sqrs.push(cels[idx_d]);
+	// 	adj_sqrs
+	// }
 }
 
 #[wasm_bindgen]
 impl Universe {
     // TODO: where do we create a new player?
     pub fn tick(&mut self, input: InputType) {
-        let mut next = self.cells.clone();
+        // let mut next = self.cells.clone();
 
-        for row in 0..self.height {
-            for col in 0..self.width {
-                let idx = self.get_index(row, col);
-                let cell = self.cells[idx];
-                let mut adj_sqrs: Vec<Cell> = self.neighbors(row, col); // < --- self.neighbors
-				let u = adj_sqrs.pop().unwrap();
-				let l = adj_sqrs.pop().unwrap();
-				let r = adj_sqrs.pop().unwrap();
-				let d = adj_sqrs.pop().unwrap();
-                // let live_neighbors = self.live_neighbor_count(row, col);
+        // for row in 0..self.height {
+        //     for col in 0..self.width {
+        //         let idx = self.get_index(row, col);
+        //         let cell = self.cells[idx];
+        //         let mut adj_sqrs: Vec<Cell> = self.neighbors(row, col); // < --- self.neighbors
+		// 		let u = adj_sqrs.pop().unwrap();
+		// 		let l = adj_sqrs.pop().unwrap();
+		// 		let r = adj_sqrs.pop().unwrap();
+		// 		let d = adj_sqrs.pop().unwrap();
+        //         // let live_neighbors = self.live_neighbor_count(row, col);
 
-                let next_cell = match (u, l, r, d, input, cell) {
-                    (Cell::Player, _, _, _, InputType::Up, _) => Cell::Player,
-                    (_, Cell::Player, _, _, InputType::Left, _) => Cell::Player,
-                    (_, _, Cell::Player, _, InputType::Right, _) => Cell::Player,
-                    (_, _, _, Cell::Player, InputType::Down, _) => Cell::Player,
-                    (_, _, _, _, _, Cell::Player) => Cell::Empty,
-                    (_, _, _, _, _, cell) => cell,
-                };
+        //         let next_cell = match (u, l, r, d, input, cell) {
+        //             (Cell::Player, _, _, _, InputType::Up, _) => Cell::Player,
+        //             (_, Cell::Player, _, _, InputType::Left, _) => Cell::Player,
+        //             (_, _, Cell::Player, _, InputType::Right, _) => Cell::Player,
+        //             (_, _, _, Cell::Player, InputType::Down, _) => Cell::Player,
+        //             (_, _, _, _, _, Cell::Player) => Cell::Empty,
+        //             (_, _, _, _, _, cell) => cell,
+        //         };
 
-                next[idx] = next_cell;
+        //         next[idx] = next_cell;
+        //     }
+        // }
+
+        // self.cells = next;
+
+        let mut plyrs = self.players_vec.clone();
+
+        for p in plyrs.iter_mut() {
+            if p.host() == self.host {
+                match input {
+                    InputType::Up => p.up(),
+                    InputType::Left => p.left(),
+                    InputType::Right => p.right(),
+                    InputType::Down => p.down(),
+                    InputType::Bomb => p.drop_bomb(),
+                }
             }
         }
 
-        self.cells = next;
+        self.players_vec = plyrs;
 
         let mut plyrs = self.players_vec.clone();
 
@@ -182,10 +199,13 @@ impl Universe {
         
         self.players_vec = plyrs;
 
-        // if input type is bomb
-        if input == InputType::Bomb {
-            // TODO: get player id and position to create new bomb and push to bombs_vec
-        }
+        // // if input type is bomb
+        // if input == InputType::Bomb {
+        //     // TODO: get player id and position to create new bomb and push to bombs_vec
+        // }
+
+
+        
     }
 
     // ...
@@ -236,9 +256,16 @@ impl Universe {
             .collect();
         
         let bombs_vec: Vec<BombStruct> = Vec::new();
-        let players_vec: Vec<Player> = Vec::new();
+        let host_player = Player::new(true, 24, 24, 10);
+        let guest_player = Player::new(false, 40, 40, 10);
+        let mut players_vec: Vec<Player> = Vec::new(); {}
+        players_vec.push(host_player);
+        players_vec.push(guest_player);
+
+        let host = true;
 
         Universe {
+            host,
             width,
             height,
             cells,
