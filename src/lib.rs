@@ -1,6 +1,8 @@
 mod utils;
 mod bomb;
 use bomb::BombStruct;
+mod wall;
+use wall::WallStruct;
 mod player;
 use player::Player;
 
@@ -263,6 +265,20 @@ impl Universe {
         players_vec.push(guest_player);
 
         let host = true;
+
+        // Construct the solid walls for the launch of universe
+        let mut walls_vec: Vec<WallStruct> = Vec::new();
+
+        for i in 0..width {
+            for j in 0.. height{
+                if (i == 0) || j==0 || i == width || j == height{
+                    walls_vec.push(WallStruct::new(i, j, false, true))
+                }
+                else if (i % 2 != 0) && (j % 2 != 0) {
+                    walls_vec.push(WallStruct::new(i, j, false, true))
+                }
+            }
+        }
 
         Universe {
             host,
