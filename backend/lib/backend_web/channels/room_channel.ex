@@ -55,7 +55,7 @@ defmodule BackendWeb.RoomChannel do
   @impl true
   def handle_in("next_turn", payload, socket) do
     # Payload is just %{"uuid" => whatever} for now
-    case State.next_turn(payload) do
+    case State.next_turn(socket.assigns.uuid, payload) do
       :not_your_turn -> nil
       uuid -> 
         broadcast_from socket, "new_turn",

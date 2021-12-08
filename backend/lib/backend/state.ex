@@ -44,8 +44,8 @@ defmodule Backend.State do
     GenServer.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
-  def next_turn(client_state) do
-    GenServer.call(__MODULE__, {:next_turn, client_state})
+  def next_turn(uuid, client_state) do
+    GenServer.call(__MODULE__, {:next_turn, uuid, client_state})
   end
  
   def get() do
@@ -63,9 +63,7 @@ defmodule Backend.State do
     {:ok, Grids.new()}
   end
 
-  def handle_call({:next_turn, client_state}, _from, state) do
-    %{"uuid" => uuid} = client_state
-
+  def handle_call({:next_turn, uuid, client_state}, _from, state) do
     case PlayerSequence.get_next_plr() do
       ^uuid ->
         IO.inspect("It is #{uuid}'s turn")
