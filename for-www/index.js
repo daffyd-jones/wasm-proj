@@ -5,19 +5,24 @@ const GRID_COLOR = "#CCCCCC";
 const GRID_FILL = "2e7700";
 
 // Load images
+const playerImgOne = new Image();
+playerImgOne.src = "./images/player1.png";
+const playerImgTwo = new Image();
+playerImgTwo.src = "./images/player2.png";
+const wallImgDes = new Image();
+wallImgDes.src = "./images/wall-destructable.png";
 const wallImgSolid = new Image();
 wallImgSolid.onload = start;
 wallImgSolid.src = "./images/wall-solid.png";
-const wallImgDes = new Image();
-wallImgDes.src = "./images/wall-destructable.png";
 
 // Construct the universe, and get its width and height.
 const universe = Universe.new();
 const width = universe.width();
 const height = universe.height();
 
-// Get initial walls
+// Get initial walls, players, and bombs
 let walls = JSON.parse(universe.walls());
+let players = JSON.parse(universe.players());
 
 // Give the canvas room for all of our cells and a 1px border
 // around each of them.
@@ -60,6 +65,10 @@ const getIndex = (row, column) => {
   return row * width + column;
 };
 
+const clearGrid = () => {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+};
+
 const drawCells = () => {
   // const cellsPtr = universe.cells();
   // const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
@@ -95,7 +104,7 @@ const drawCells = () => {
 };
 
 const drawWalls = (walls) => {
-  ctx.beginPath();
+  // ctx.beginPath();
 
   walls.forEach((wall) => {
     if (wall.alive) {
@@ -105,14 +114,34 @@ const drawWalls = (walls) => {
       if (wall.destructible) {
         ctx.drawImage(
           wallImgDes,
-          col * (CELL_SIZE + 1) + 1,
-          row * (CELL_SIZE + 1) + 1
+          row * (CELL_SIZE + 1) + 1,
+          col * (CELL_SIZE + 1) + 1
         );
       } else {
         ctx.drawImage(
           wallImgSolid,
-          col * (CELL_SIZE + 1) + 1,
-          row * (CELL_SIZE + 1) + 1
+          row * (CELL_SIZE + 1) + 1,
+          col * (CELL_SIZE + 1) + 1
+        );
+      }
+    }
+  });
+};
+
+const drawPlayers = (players) => {
+  players.forEach((player) => {
+    if (player.alive) {
+      if (player.host) {
+        ctx.drawImage(
+          playerImgOne,
+          player.x * (CELL_SIZE + 1) + 1,
+          player.y * (CELL_SIZE + 1) + 1
+        );
+      } else {
+        ctx.drawImage(
+          playerImgTwo,
+          player.x * (CELL_SIZE + 1) + 1,
+          player.y * (CELL_SIZE + 1) + 1
         );
       }
     }
@@ -195,16 +224,15 @@ function setEventListener() {
       event.preventDefault();
       walls = JSON.parse(universe.walls());
       const bombs = JSON.parse(universe.bombs());
-      const players = JSON.parse(universe.players());
-      walls.forEach((wall) => {
-        console.log(wall);
-      });
+      players = JSON.parse(universe.players());
       // console.log(walls);
       // console.log(bombs);
       console.log(players);
+      clearGrid();
       drawGrid();
       drawCells();
       drawWalls(walls);
+      drawPlayers(players);
       // requestAnimationFrame(renderLoop);
     },
     true
@@ -217,5 +245,6 @@ function start() {
   drawGrid();
   drawCells();
   drawWalls(walls);
+  drawPlayers(players);
 }
 // requestAnimationFrame(renderLoop);
