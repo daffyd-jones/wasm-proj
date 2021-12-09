@@ -6,6 +6,8 @@ use wall::WallStruct;
 mod player;
 use player::Player;
 
+use rand::Rng;
+
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
 
@@ -49,7 +51,7 @@ pub enum InputType {
 
 #[wasm_bindgen]
 pub struct Universe {
-    id: i32,
+    host_id: i32,
     width: u32,
     height: u32,
     cells: Vec<Cell>,
@@ -192,6 +194,11 @@ impl Universe {
 		adj_sqrs.push(cels[idx_d]);
 		adj_sqrs
 	}
+
+    // fn place_bomb(&self, id: i32) {
+    //     let bombs = self.bombs_vec.clone();
+    //     let bomb = BombStruct::new(x: i32, y: i32)
+    // }
 }
 
 #[wasm_bindgen]
@@ -202,7 +209,7 @@ impl Universe {
         let mut fail = false;
 
         for p in plyrs.iter_mut() {
-            if p.id() == self.id {
+            if p.id() == self.host_id {
                 match input {
                     InputType::Up if !self.occupied(p.x(), p.y() - 1) => p.up(),
                     InputType::Left if !self.occupied(p.x() - 1, p.y()) => p.left(),
@@ -349,13 +356,13 @@ impl Universe {
             .collect();
         
         let bombs_vec: Vec<BombStruct> = Vec::new();
-        let host_player = Player::new(1, 24, 24, 10);
+        let mut rng = rand::thread_rng();
+        let num = rng.gen::<i32>();
+        let host_player = Player::new(num, 24, 24, 10);
         let guest_player = Player::new(2, 40, 40, 10);
         let mut players_vec: Vec<Player> = Vec::new(); {}
         players_vec.push(host_player);
         players_vec.push(guest_player);
-
-        let id = 1;
 
         // Construct the solid walls for the launch of universe
         let mut walls_vec: Vec<WallStruct> = Vec::new();
@@ -375,7 +382,7 @@ impl Universe {
         }
 
         Universe {
-            id,
+            host_id: num,
             width: 32,
             height: 32,
             cells,
