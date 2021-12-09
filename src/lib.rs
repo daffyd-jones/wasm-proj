@@ -9,6 +9,7 @@ use player::Player;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
+use rand::Rng;
 
 use wasm_bindgen::prelude::*;
 
@@ -313,8 +314,8 @@ impl Universe {
     // ...
 
     pub fn new() -> Universe {
-        let width = 32;
-        let height = 32;
+        let width = 33;
+        let height = 33;
 
         let cells = (0..width * height)
             .map(|i| {
@@ -346,24 +347,40 @@ impl Universe {
         // Construct the solid walls for the launch of universe
         let mut walls_vec: Vec<WallStruct> = Vec::new();
 
+        let mut rng = rand::thread_rng();
+
         // let wid = width.clone();
         // let hi = height.clone();
 
         for i in 0..width {
             for j in 0.. height{
-                if (i == 0) || j==0 || i == width || j == height{
+                // add indestructible walls
+                if i == 0 || j == 0 || i == width - 1 || j == height - 1 {
                     walls_vec.push(WallStruct::new(i, j, false, true))
                 }
-                else if (i % 2 != 0) && (j % 2 != 0) {
-                    walls_vec.push(WallStruct::new(i, j, false, true))
+                else if (i % 2 == 0) && (j % 2 == 0) {
+                    // leave space around players with no walls
+                    if (i == 2 && (j == 2 || j == height - 3)) || (i == width - 3 && (j == 2 || j == height - 3)) {
+                        continue;
+                    } else {
+                        walls_vec.push(WallStruct::new(i, j, false, true))
+                    }
+                }
+                // add indestructible walls
+                else if i != 1 && i != width - 2 && j != 1 && j != height - 2 {
+                    let rand_no_wall_i = rng.gen_range(2..width - 2);
+                    let rand_no_wall_j = rng.gen_range(2..height - 2);
+                    if i != rand_no_wall_i && j != rand_no_wall_j {
+                        walls_vec.push(WallStruct::new(i, j, true, true))
+                    }
                 }
             }
         }
 
         Universe {
             host,
-            width: 32,
-            height: 32,
+            width: 33,
+            height: 33,
             cells,
             bombs_vec,
             bombs_locations,
