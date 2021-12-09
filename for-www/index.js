@@ -1,4 +1,5 @@
 import { Universe, Cell } from "wasm-proj";
+import { memory } from "../pkg/wasm_proj_bg";
 
 const CELL_SIZE = 25; // px
 const GRID_COLOR = "#CCCCCC";
@@ -9,6 +10,16 @@ const playerImgOne = new Image();
 playerImgOne.src = "./images/player1.png";
 const playerImgTwo = new Image();
 playerImgTwo.src = "./images/player2.png";
+const bombOne = new Image();
+bombOne.src = "./images/bomb1.png";
+const bombTwo = new Image();
+bombTwo.src = "./images/bomb2.png";
+const bombThree = new Image();
+bombThree.src = "./images/bomb3.png";
+const bombFour = new Image();
+bombFour.src = "./images/bomb4.png";
+const bombFive = new Image();
+bombFive.src = "./images/bomb5.png";
 const wallImgDes = new Image();
 wallImgDes.src = "./images/wall-destructable.png";
 const wallImgSolid = new Image();
@@ -23,6 +34,7 @@ const height = universe.height();
 // Get initial walls, players, and bombs
 let walls = JSON.parse(universe.walls());
 let players = JSON.parse(universe.players());
+let bombs = JSON.parse(universe.bombs());
 
 // Give the canvas room for all of our cells and a 1px border
 // around each of them.
@@ -31,12 +43,6 @@ canvas.height = (CELL_SIZE + 1) * height + 1;
 canvas.width = (CELL_SIZE + 1) * width + 1;
 
 const ctx = canvas.getContext("2d");
-
-// const renderLoop = () => {
-
-//   drawGrid();
-//   drawCells();
-// };
 
 const drawGrid = () => {
   ctx.beginPath();
@@ -57,10 +63,6 @@ const drawGrid = () => {
   ctx.stroke();
 };
 
-import { memory } from "../pkg/wasm_proj_bg";
-
-// ...
-
 const getIndex = (row, column) => {
   return row * width + column;
 };
@@ -69,43 +71,7 @@ const clearGrid = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 };
 
-const drawCells = () => {
-  // const cellsPtr = universe.cells();
-  // const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
-  // ctx.beginPath();
-  // for (let row = 0; row < height; row++) {
-  //   for (let col = 0; col < width; col++) {
-  //     const idx = getIndex(row, col);
-  //     // ctx.fillStyle = cells[idx] === Cell.Empty
-  //     //   ? DEAD_COLOR
-  //     //   : ALIVE_COLOR;
-  //     switch (cells[idx]) {
-  // 			case Cell.Empty:
-  // 				ctx.fillStyle = DEAD_COLOR;
-  // 				break;
-  // 			case Cell.Player:
-  // 				ctx.fillStyle = ALIVE_COLOR;
-  //       	break;
-  // 			case Cell.Block:
-  //         ctx.fillStyle = BLOCK_COLOR;
-  //         break;
-  // 			default:
-  // 				ctx.fillStyle = "#FFBF00";
-  // 		}
-  //     ctx.fillRect(
-  //       col * (CELL_SIZE + 1) + 1,
-  //       row * (CELL_SIZE + 1) + 1,
-  //       CELL_SIZE,
-  //       CELL_SIZE
-  //     );
-  //   }
-  // }
-  // ctx.stroke();
-};
-
 const drawWalls = (walls) => {
-  // ctx.beginPath();
-
   walls.forEach((wall) => {
     if (wall.alive) {
       let row = wall.x;
@@ -131,7 +97,7 @@ const drawWalls = (walls) => {
 const drawPlayers = (players) => {
   players.forEach((player) => {
     if (player.alive) {
-      if (player.host) {
+      if (player.id != 2) {
         ctx.drawImage(
           playerImgOne,
           player.x * (CELL_SIZE + 1) + 1,
@@ -146,6 +112,10 @@ const drawPlayers = (players) => {
       }
     }
   });
+};
+
+const drawBombs = (bombs) => {
+  bombs.forEach((bomb) => {});
 };
 
 function setEventListener() {
@@ -223,17 +193,14 @@ function setEventListener() {
       }
       event.preventDefault();
       walls = JSON.parse(universe.walls());
-      const bombs = JSON.parse(universe.bombs());
+      bombs = JSON.parse(universe.bombs());
       players = JSON.parse(universe.players());
-      // console.log(walls);
-      // console.log(bombs);
-      console.log(players);
+      console.log(bombs);
       clearGrid();
       drawGrid();
-      drawCells();
       drawWalls(walls);
       drawPlayers(players);
-      // requestAnimationFrame(renderLoop);
+      drawBombs(bombs);
     },
     true
   );
@@ -243,8 +210,6 @@ function start() {
   setEventListener();
   universe.tick();
   drawGrid();
-  drawCells();
   drawWalls(walls);
   drawPlayers(players);
 }
-// requestAnimationFrame(renderLoop);

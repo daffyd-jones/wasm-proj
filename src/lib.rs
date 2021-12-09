@@ -224,7 +224,7 @@ impl Universe {
                     InputType::Up if !self.occupied(p.x(), p.y() - 1) => p.up(),
                     InputType::Left if !self.occupied(p.x() - 1, p.y()) => p.left(),
                     InputType::Right if !self.occupied(p.x() + 1, p.y()) => p.right(),
-                    InputType::Down if !self.occupied(p.x(), p.y() - 1) => p.down(),
+                    InputType::Down if !self.occupied(p.x(), p.y() + 1) => p.down(),
                     InputType::Bomb => self.place_bomb(),
                     _ => fail = true
                 }
