@@ -56,43 +56,43 @@ const getIndex = (row, column) => {
 };
 
 const drawCells = () => {
-  const cellsPtr = universe.cells();
-  const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
+  // const cellsPtr = universe.cells();
+  // const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
 
-  ctx.beginPath();
+  // ctx.beginPath();
 
-  for (let row = 0; row < height; row++) {
-    for (let col = 0; col < width; col++) {
-      const idx = getIndex(row, col);
+  // for (let row = 0; row < height; row++) {
+  //   for (let col = 0; col < width; col++) {
+  //     const idx = getIndex(row, col);
 
-      // ctx.fillStyle = cells[idx] === Cell.Empty
-      //   ? DEAD_COLOR
-      //   : ALIVE_COLOR;
+  //     // ctx.fillStyle = cells[idx] === Cell.Empty
+  //     //   ? DEAD_COLOR
+  //     //   : ALIVE_COLOR;
 
-      switch (cells[idx]) {
-				case Cell.Empty:
-					ctx.fillStyle = DEAD_COLOR;
-					break;
-				case Cell.Player:
-					ctx.fillStyle = ALIVE_COLOR;
-        	break;	
-				case Cell.Block:
-          ctx.fillStyle = BLOCK_COLOR;
-          break;
-				default:
-					ctx.fillStyle = "#FFBF00";
-			}
+  //     switch (cells[idx]) {
+	// 			case Cell.Empty:
+	// 				ctx.fillStyle = DEAD_COLOR;
+	// 				break;
+	// 			case Cell.Player:
+	// 				ctx.fillStyle = ALIVE_COLOR;
+  //       	break;	
+	// 			case Cell.Block:
+  //         ctx.fillStyle = BLOCK_COLOR;
+  //         break;
+	// 			default:
+	// 				ctx.fillStyle = "#FFBF00";
+	// 		}
 
-      ctx.fillRect(
-        col * (CELL_SIZE + 1) + 1,
-        row * (CELL_SIZE + 1) + 1,
-        CELL_SIZE,
-        CELL_SIZE
-      );
-    }
-  }
+  //     ctx.fillRect(
+  //       col * (CELL_SIZE + 1) + 1,
+  //       row * (CELL_SIZE + 1) + 1,
+  //       CELL_SIZE,
+  //       CELL_SIZE
+  //     );
+  //   }
+  // }
 
-  ctx.stroke();
+  // ctx.stroke();
 };
 
 function setEventListener() {
@@ -104,29 +104,75 @@ function setEventListener() {
     switch (event.key) {
       case "ArrowDown":
         console.log("arrow down");
-        universe.down_move();
+        const dres = universe.down_move();
+        switch (dres) {
+          case "fail":
+            console.log("move failed, cell occupied");
+            break;
+          case "pass":
+            console.log("move successful");
+            break;
+        }
         break;
       case "ArrowUp":
         console.log("arrow up");
-        universe.up_move();
+        const ures = universe.up_move();
+        switch (ures) {
+          case "fail":
+            console.log("move failed, cell occupied");
+            break;
+          case "pass":
+            console.log("move successful");
+            break;
+        }
         break;
       case "ArrowLeft":
         console.log("arrow left");
-        universe.left_move();
+        const lres = universe.left_move();
+        switch (lres) {
+          case "fail":
+            console.log("move failed, cell occupied");
+            break;
+          case "pass":
+            console.log("move successful");
+            break;
+        }
         break;
       case "ArrowRight":
         console.log("arrow right");
-        universe.right_move();
+        const rres = universe.right_move();
+        switch (rres) {
+          case "fail":
+            console.log("move failed, cell occupied");
+            break;
+          case "pass":
+            console.log("move successful");
+            break;
+        }
         break;
       case "b":
         console.log("space");
-        universe.bomb_move();
+        const bres = universe.bomb_move();
+        switch (bres) {
+          case "fail":
+            console.log("move failed, cell occupied");
+            break;
+          case "pass":
+            console.log("move successful");
+            break;
+        }
         break;
       default:
         console.log(event.key);
         return; 
     }
     event.preventDefault();
+    const walls = universe.walls();
+    const bombs = universe.bombs();
+    const players = universe.players();
+    console.log(walls);
+    console.log(bombs);
+    console.log(players);
     drawGrid();
     drawCells();
     // requestAnimationFrame(renderLoop);
