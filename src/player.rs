@@ -50,7 +50,7 @@ impl Player {
   }
 
   pub fn right(&mut self) {
-    self.move_to(self.x + 1, self.y)
+    self.move_to(self.x + 1, self.y);
   }
 
   // lose life

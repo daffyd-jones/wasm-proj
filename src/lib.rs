@@ -146,19 +146,19 @@ impl Universe {
         let players = self.players_vec.clone();
 
         for w in walls.iter() {
-            if w.x() == col && w.y() == row {
+            if w.x() == row && w.y() == col {
                 wall_check = true;
             }
         }
 
         for b in bombs.iter() {
-            if b.x() == col && b.y() == row {
+            if b.x() == row && b.y() == col {
                 bomb_check = true;
             }
         }
 
         for p in players.iter() {
-            if p.x() == col && p.y() == row {
+            if p.x() == row && p.y() == col {
                 player_check = true;
             }
         }
@@ -336,8 +336,8 @@ impl Universe {
             .collect();
         
         let bombs_vec: Vec<BombStruct> = Vec::new();
-        let host_player = Player::new(true, 24, 24, 10);
-        let guest_player = Player::new(false, 40, 40, 10);
+        let host_player = Player::new(true, 1, 1, 10);
+        let guest_player = Player::new(false, 31, 31, 10);
         let mut players_vec: Vec<Player> = Vec::new(); {}
         players_vec.push(host_player);
         players_vec.push(guest_player);
