@@ -1,7 +1,5 @@
 mod utils;
-<<<<<<< HEAD
-mod connect;
-=======
+
 mod bomb;
 use bomb::BombStruct;
 mod wall;
@@ -11,7 +9,6 @@ use player::Player;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
->>>>>>> ben-player-bomb
 
 use wasm_bindgen::prelude::*;
 
