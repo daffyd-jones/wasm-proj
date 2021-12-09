@@ -252,9 +252,12 @@ impl Universe {
 
         let mut plyrs = self.players_vec.clone();
         let mut walls = self.walls_vec.clone();
+        let mut bombs = self.bombs_vec.clone();
 
+        let mut dead_bombs: Vec<usize> = Vec::new();
+        let mut idx = 0;
         // tick down bombs
-        for b in self.bombs_vec.iter_mut() {
+        for b in bombs.iter_mut() {
             b.count_down();
             if b.timer() == 0 {
                 let affected_tiles = b.explosion_tiles();
@@ -278,57 +281,20 @@ impl Universe {
                         }
                     }
                 } 
-                
-                
+
+                dead_bombs.push(idx);
             }
+            idx += 1;
         }
-        
+
+        for i in dead_bombs.iter() {
+            bombs.remove(*i);
+        }
+        self.bombs_vec = bombs;
         self.players_vec = plyrs;
         self.walls_vec = walls;
 
-        return String::from("pass");
-
-        // let mut next = self.cells.clone();
-
-        // for row in 0..self.height {
-        //     for col in 0..self.width {
-        //         let idx = self.get_index(row, col);
-        //         let cell = self.cells[idx];
-                // let mut adj_sqrs: Vec<Cell> = self.neighbors(row, col); // < --- self.neighbors
-				// let u = adj_sqrs.pop().unwrap();
-				// let l = adj_sqrs.pop().unwrap();
-				// let r = adj_sqrs.pop().unwrap();
-				// let d = adj_sqrs.pop().unwrap();
-                // let live_neighbors = self.live_neighbor_count(row, col);
-                
-                // let walls = self.walls_vec.clone();
-                // let bombs = self.bombs_vec.clone();
-                // let players = self.players_vec.clone();
-
-                // for w in walls.iter() {
-                //     if w.y() == row && w.x() == col {
-
-                //     }
-                // }
-
-
-                // let next_cell = match (u, l, r, d, input, cell) {
-                //     (Cell::Player, _, _, _, InputType::Up, _) => Cell::Player,
-                //     (_, Cell::Player, _, _, InputType::Left, _) => Cell::Player,
-                //     (_, _, Cell::Player, _, InputType::Right, _) => Cell::Player,
-                //     (_, _, _, Cell::Player, InputType::Down, _) => Cell::Player,
-                //     (_, _, _, _, _, Cell::Player) => Cell::Empty,
-                //     (_, _, _, _, _, cell) => cell,
-                // };
-
-                // next[idx] = next_cell;
-        //     }
-        // }
-
-        // self.cells = next;
-
-
-        
+        return String::from("pass"); 
     }
 
     // ...
