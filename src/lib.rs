@@ -127,6 +127,21 @@ impl Universe {
         serialized
     }
 
+    pub fn setPlayers(&mut self, players: String) {
+        let deserialized: Vec<Player> = serde_json::from_str(&players).unwrap();
+        self.players_vec = deserialized;
+    }
+
+    pub fn setWalls(&mut self, walls: String) {
+        let deserialized: Vec<WallStruct> = serde_json::from_str(&walls).unwrap();
+        self.walls_vec = deserialized;
+    }
+
+    pub fn setBombs(&mut self, bombs: String) {
+        let deserialized: Vec<BombStruct> = serde_json::from_str(&bombs).unwrap();
+        self.bombs_vec = deserialized;
+    }
+
 
 }
 
