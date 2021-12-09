@@ -196,11 +196,24 @@ impl Universe {
 		adj_sqrs
 	}
 
-    fn place_bomb(&mut self) {
+    fn bomb_here(&self, x: i32, y: i32) -> bool {
+        let bombs = self.bombs_vec.clone();
+        for b in bombs.iter() {
+            if b.x() == x && b.y() == y {
+                return true;
+            }
+        }
+        return false;
+    }
+ 
+    fn place_bomb(&mut self) -> bool {
         let mut bombs = self.bombs_vec.clone();
         let mut players = self.players_vec.clone();
         for p in players.iter_mut() {
             if p.id() == self.host_id {
+                if self.bomb_here(p.x(), p.y()) {
+                    return true;
+                }
                 let bomb = BombStruct::new(p.x(), p.y());
                 bombs.push(bomb);
                 p.drop_bomb();
@@ -208,6 +221,7 @@ impl Universe {
         }
         self.players_vec = players;
         self.bombs_vec = bombs;
+        return false;
     }
 }
 
@@ -225,7 +239,7 @@ impl Universe {
                     InputType::Left if !self.occupied(p.x() - 1, p.y()) => p.left(),
                     InputType::Right if !self.occupied(p.x() + 1, p.y()) => p.right(),
                     InputType::Down if !self.occupied(p.x(), p.y() + 1) => p.down(),
-                    InputType::Bomb => self.place_bomb(),
+                    InputType::Bomb => fail = self.place_bomb(),
                     _ => fail = true
                 }
             }
