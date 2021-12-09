@@ -1,23 +1,31 @@
+use rand::Rng;
+use serde::{Serialize, Deserialize};
 
 // Struct for Bombs
   // x: x coord
   // y: y coord
   // power: bomb power level
-struct Bomb {
+  // timer: count down to explosion
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+pub struct BombStruct {
   x: i32,
   y: i32,
   power: i32,
+  timer: i32
 }
 
-impl Bomb {
+impl BombStruct {
 
   // Constructor for bombs
-  fn new(x: i32, y: i32, pow: i32) -> Bomb {
-    Bomb { x: x, y: y, power: pow }
+  pub fn new(x: i32, y: i32) -> BombStruct {
+    // Generate a random number between 1 and 5 to be the power and timer
+    let mut rng = rand::thread_rng();
+    let rand_pow_time = rng.gen_range(1..6);
+    BombStruct { x: x, y: y, power: rand_pow_time, timer: rand_pow_time }
   }
 
   // Get vector of tuples containing all exploded tiles.
-  fn explosion_tiles(&self) -> Vec<(i32, i32)> {
+  pub fn explosion_tiles(&self) -> Vec<(i32, i32)> {
     let mut v = Vec::new();
     for i in 0..(self.power) {
       v.push((self.x, (self.y + i)));
@@ -28,4 +36,31 @@ impl Bomb {
 
     return v;
   }
+
+  // Count down to explosion
+  pub fn count_down(&mut self) {
+    self.timer -= 1;
+  }
+
+  pub fn position(self) -> (i32, i32) {
+    return (self.x, self.y);
+  }
+
+  pub fn x(self) -> i32 {
+    return self.x;
+  }
+
+  pub fn y(self) -> i32 {
+    return self.y;
+  }
+
+
+  pub fn power(self) -> i32 {
+    return self.power;
+  }
+
+  pub fn timer(self) -> i32 {
+    return self.timer;
+  }
 }
+
