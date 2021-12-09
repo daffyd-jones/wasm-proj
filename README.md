@@ -9,8 +9,8 @@
     `"wasm-proj": "file:../pkg",`
 4. `npm install`
 5. Delete `index.html` and `index.js` in `www`
-6. Copy `index.js` and `index.html` in `for-www` folder into `www`
-7. `npm run start`
+6. Copy `index.js` and `index.html` in the `for-www` folder into `www`
+7. In the `www` directory type `npm run start`
 
 The port is set to 8080
 
