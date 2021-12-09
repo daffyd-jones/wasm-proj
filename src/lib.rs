@@ -195,10 +195,19 @@ impl Universe {
 		adj_sqrs
 	}
 
-    // fn place_bomb(&self, id: i32) {
-    //     let bombs = self.bombs_vec.clone();
-    //     let bomb = BombStruct::new(x: i32, y: i32)
-    // }
+    fn place_bomb(&mut self) {
+        let mut bombs = self.bombs_vec.clone();
+        let mut players = self.players_vec.clone();
+        for p in players.iter_mut() {
+            if p.id() == self.host_id {
+                let bomb = BombStruct::new(p.x(), p.y());
+                bombs.push(bomb);
+                p.drop_bomb();
+            }
+        }
+        self.players_vec = players;
+        self.bombs_vec = bombs;
+    }
 }
 
 #[wasm_bindgen]
@@ -215,7 +224,7 @@ impl Universe {
                     InputType::Left if !self.occupied(p.x() - 1, p.y()) => p.left(),
                     InputType::Right if !self.occupied(p.x() + 1, p.y()) => p.right(),
                     InputType::Down if !self.occupied(p.x(), p.y() - 1) => p.down(),
-                    InputType::Bomb => p.drop_bomb(),
+                    InputType::Bomb => self.place_bomb(),
                     _ => fail = true
                 }
             }
