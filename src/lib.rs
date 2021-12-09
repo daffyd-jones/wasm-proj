@@ -133,6 +133,11 @@ impl Universe {
         self.players_vec = deserialized;
     }
 
+    pub fn add_player(&mut self, new_player: String) {
+        let deserialized: Player = serde_json::from_str(&new_player).unwrap();
+        self.players_vec.push(deserialized);
+    }
+
     pub fn set_walls(&mut self, walls: String) {
         let deserialized: Vec<WallStruct> = serde_json::from_str(&walls).unwrap();
         self.walls_vec = deserialized;
