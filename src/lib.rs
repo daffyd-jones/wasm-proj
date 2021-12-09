@@ -151,7 +151,7 @@ impl Universe {
     // ...
 
 
-    fn occupied(&self, row: i32, col: i32) -> bool {
+    fn occupied(&self, col: i32, row: i32) -> bool {
         let mut bomb_check = false;
         let mut wall_check = false;
         let mut player_check = false;
