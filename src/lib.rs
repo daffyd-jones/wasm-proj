@@ -50,7 +50,7 @@ pub enum InputType {
 
 #[wasm_bindgen]
 pub struct Universe {
-    host: bool,
+    id: i32,
     width: u32,
     height: u32,
     cells: Vec<Cell>,
@@ -128,17 +128,17 @@ impl Universe {
         serialized
     }
 
-    pub fn setPlayers(&mut self, players: String) {
+    pub fn set_players(&mut self, players: String) {
         let deserialized: Vec<Player> = serde_json::from_str(&players).unwrap();
         self.players_vec = deserialized;
     }
 
-    pub fn setWalls(&mut self, walls: String) {
+    pub fn set_walls(&mut self, walls: String) {
         let deserialized: Vec<WallStruct> = serde_json::from_str(&walls).unwrap();
         self.walls_vec = deserialized;
     }
 
-    pub fn setBombs(&mut self, bombs: String) {
+    pub fn set_bombs(&mut self, bombs: String) {
         let deserialized: Vec<BombStruct> = serde_json::from_str(&bombs).unwrap();
         self.bombs_vec = deserialized;
     }
@@ -203,7 +203,7 @@ impl Universe {
         let mut fail = false;
 
         for p in plyrs.iter_mut() {
-            if p.host() == self.host {
+            if p.id() == self.id {
                 match input {
                     InputType::Up if !self.occupied(p.x(), p.y() - 1) => p.up(),
                     InputType::Left if !self.occupied(p.x() - 1, p.y()) => p.left(),
@@ -350,13 +350,13 @@ impl Universe {
             .collect();
         
         let bombs_vec: Vec<BombStruct> = Vec::new();
-        let host_player = Player::new(true, 24, 24, 10);
-        let guest_player = Player::new(false, 40, 40, 10);
+        let host_player = Player::new(1, 24, 24, 10);
+        let guest_player = Player::new(2, 40, 40, 10);
         let mut players_vec: Vec<Player> = Vec::new(); {}
         players_vec.push(host_player);
         players_vec.push(guest_player);
 
-        let host = true;
+        let id = 1;
 
         // Construct the solid walls for the launch of universe
         let mut walls_vec: Vec<WallStruct> = Vec::new();
@@ -376,7 +376,7 @@ impl Universe {
         }
 
         Universe {
-            host,
+            id,
             width: 32,
             height: 32,
             cells,
