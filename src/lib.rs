@@ -7,9 +7,10 @@ use wall::WallStruct;
 mod player;
 use player::Player;
 
+use rand::Rng;
+
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
-use rand::Rng;
 
 use wasm_bindgen::prelude::*;
 
@@ -51,7 +52,7 @@ pub enum InputType {
 
 #[wasm_bindgen]
 pub struct Universe {
-    host: bool,
+    host_id: i32,
     width: u32,
     height: u32,
     cells: Vec<Cell>,
@@ -129,6 +130,21 @@ impl Universe {
         serialized
     }
 
+    pub fn set_players(&mut self, players: String) {
+        let deserialized: Vec<Player> = serde_json::from_str(&players).unwrap();
+        self.players_vec = deserialized;
+    }
+
+    pub fn set_walls(&mut self, walls: String) {
+        let deserialized: Vec<WallStruct> = serde_json::from_str(&walls).unwrap();
+        self.walls_vec = deserialized;
+    }
+
+    pub fn set_bombs(&mut self, bombs: String) {
+        let deserialized: Vec<BombStruct> = serde_json::from_str(&bombs).unwrap();
+        self.bombs_vec = deserialized;
+    }
+
 
 }
 
@@ -136,7 +152,7 @@ impl Universe {
     // ...
 
 
-    fn occupied(&self, row: i32, col: i32) -> bool {
+    fn occupied(&self, col: i32, row: i32) -> bool {
         let mut bomb_check = false;
         let mut wall_check = false;
         let mut player_check = false;
@@ -179,6 +195,20 @@ impl Universe {
 		adj_sqrs.push(cels[idx_d]);
 		adj_sqrs
 	}
+
+    fn place_bomb(&mut self) {
+        let mut bombs = self.bombs_vec.clone();
+        let mut players = self.players_vec.clone();
+        for p in players.iter_mut() {
+            if p.id() == self.host_id {
+                let bomb = BombStruct::new(p.x(), p.y());
+                bombs.push(bomb);
+                p.drop_bomb();
+            }
+        }
+        self.players_vec = players;
+        self.bombs_vec = bombs;
+    }
 }
 
 #[wasm_bindgen]
@@ -189,13 +219,13 @@ impl Universe {
         let mut fail = false;
 
         for p in plyrs.iter_mut() {
-            if p.host() == self.host {
+            if p.id() == self.host_id {
                 match input {
                     InputType::Up if !self.occupied(p.x(), p.y() - 1) => p.up(),
                     InputType::Left if !self.occupied(p.x() - 1, p.y()) => p.left(),
                     InputType::Right if !self.occupied(p.x() + 1, p.y()) => p.right(),
                     InputType::Down if !self.occupied(p.x(), p.y() - 1) => p.down(),
-                    InputType::Bomb => p.drop_bomb(),
+                    InputType::Bomb => self.place_bomb(),
                     _ => fail = true
                 }
             }
@@ -336,18 +366,17 @@ impl Universe {
             .collect();
         
         let bombs_vec: Vec<BombStruct> = Vec::new();
-        let host_player = Player::new(true, 1, 1, 10);
-        let guest_player = Player::new(false, 31, 31, 10);
+
+        let mut rng = rand::thread_rng();
+        let num = rng.gen::<i32>();
+        let host_player = Player::new(num, 1, 1, 10);
+        let guest_player = Player::new(2, 31, 31, 10);
         let mut players_vec: Vec<Player> = Vec::new(); {}
         players_vec.push(host_player);
         players_vec.push(guest_player);
 
-        let host = true;
-
         // Construct the solid walls for the launch of universe
         let mut walls_vec: Vec<WallStruct> = Vec::new();
-
-        let mut rng = rand::thread_rng();
 
         // let wid = width.clone();
         // let hi = height.clone();
@@ -378,7 +407,7 @@ impl Universe {
         }
 
         Universe {
-            host,
+            host_id: num,
             width: 33,
             height: 33,
             cells,
