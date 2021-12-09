@@ -34,7 +34,7 @@ const createClient = (clientUUID) => {
 
         // Painful
         if (payload.status && payload.status === "new_turn") {
-            thingy.innerText = `Player ${payload.uuid}'s turn`;
+            thingy.innerText = `It's currently Player ${payload.uuid}'s turn`;
         } else if (msg.event === "new_plr") {
             
             if (payload.id === clientUUID) {
@@ -43,6 +43,8 @@ const createClient = (clientUUID) => {
                 client.state.players.push(payload);
             }
         } else if (msg.event === "phx_reply") {
+
+            console.log(msg);
             
             // Matching the response thingy for "inspect_all"
             if (payload.response && Array.isArray(payload.response)) {
@@ -63,10 +65,10 @@ const funnyJsonPayload = (state) => {
     return thingy;
 }
 
-for (i = 0; i < 4; i++) {
+for (i = 0; i < 2; i++) {
     const clientUUID = crypto.getRandomValues(new Uint32Array(1))[0];
     const b = document.createElement("button");
-    b.innerText = `Player ${clientUUID}`;
+    b.innerText = `Finish Player ${clientUUID}'s turn`;
 
     const client = createClient(clientUUID);
     clients.push(client);
@@ -74,8 +76,7 @@ for (i = 0; i < 4; i++) {
     buttons.append(b);
 
     b.onclick = (e) => {
-        console.log(b.innerText);
-        sendMsg(client.socket, "next_turn", funnyJsonPayload(client.state));
+        sendMsg(client.socket, "finish_turn", funnyJsonPayload(client.state));
     }
 }
 

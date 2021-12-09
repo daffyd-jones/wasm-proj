@@ -30,6 +30,10 @@ defmodule Backend.Player do
 
   def inspect(pid), do: GenServer.call(pid, :inspect)
 
+  def update_state(uuid, new_state) do
+    GenServer.cast(name(uuid), {:update_state, new_state})
+  end
+
   def update_pos(uuid, new_pos) do
     GenServer.cast(name(uuid), {:update_pos, new_pos})
   end
@@ -47,6 +51,11 @@ defmodule Backend.Player do
   @impl true
   def handle_call(:inspect, _from, state) do
     {:reply, state, state}
+  end
+
+  @impl true
+  def handle_cast({:update_state, new_state}, _state) do
+    {:noreply, new_state}
   end
 
   @impl true

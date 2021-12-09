@@ -5,7 +5,8 @@ defmodule Backend.State do
     PlayerSupervisor,
     Player,
     State,
-    Grid
+    Grid,
+    Bomb
   }
 
   #defmodule Grids do
@@ -39,8 +40,7 @@ defmodule Backend.State do
   #  end
   #end
 
-  defstruct players: [],
-            bombs: [],
+  defstruct bombs: [],
             walls: []
 
   ### Public API ###
@@ -53,8 +53,8 @@ defmodule Backend.State do
     GenServer.call(__MODULE__, :inspect)
   end
 
-  def next_turn(uuid, client_state) do
-    GenServer.call(__MODULE__, {:next_turn, uuid, client_state})
+  def finish_turn(uuid, client_state) do
+    GenServer.call(__MODULE__, {:finish_turn, uuid, client_state})
   end
  
   #def get() do
@@ -70,23 +70,32 @@ defmodule Backend.State do
   @impl true
   def init(_) do
     #{:ok, Grids.new()}
-    {:ok, %State{players: [], bombs: [], walls: []}}
+    {:ok, %State{bombs: [], walls: []}}
   end
 
   @impl true
   def handle_call(:inspect, _from, state) do
-    {:ok, state, state}
+    reply = Map.merge(
+      %{players: PlayerSupervisor.inspect_all()},
+      state |> Map.from_struct()
+    )
+    {:reply, reply, state}
   end
   
   @impl true
-  def handle_call({:next_turn, uuid, client_state}, _from, state) do
-    case PlayerSequence.get_next_plr() do
+  def handle_call({:finish_turn, uuid, client_state}, _from, state) do
+    case PlayerSequence.current_plr() do
       ^uuid ->
         IO.inspect("It is #{uuid}'s turn")
+
         PlayerSequence.save_next_plr()
-        {:reply, uuid, state}
+        PlayerSupervisor.update_plrs(client_state["players"])
+        
+        # Sending the next player ID
+        {:reply, PlayerSequence.current_plr(), state}
       _ ->
         IO.inspect("It is not #{uuid}'s turn")
+        
         {:reply, :not_your_turn, state}
     end
   end
