@@ -1,5 +1,6 @@
 // mod bomb;
 // use bomb::Bomb;
+use serde::{Serialize, Deserialize};
 
 // Struct for Players
   // name: name of player character
@@ -10,7 +11,7 @@
   // power: power level of bombs (how many tiles from center it explodes)
   // alive: is player alive
   // hp: how many lives a player has left
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Serialize, Deserialize)]
 pub struct Player {
   // name: String,
   host: bool,

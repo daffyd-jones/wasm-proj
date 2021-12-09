@@ -6,6 +6,9 @@ use wall::WallStruct;
 mod player;
 use player::Player;
 
+use serde::{Deserialize, Serialize};
+use serde_json::Result;
+
 use wasm_bindgen::prelude::*;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -84,30 +87,47 @@ impl Universe {
 #[wasm_bindgen]
 impl Universe {
 
-    pub fn up_move(&mut self) {
-        self.tick(InputType::Up)
+    pub fn up_move(&mut self) -> String {
+        return self.tick(InputType::Up);
         //move player up
     }
 
-    pub fn left_move(&mut self) {
-        self.tick(InputType::Left)
+    pub fn left_move(&mut self) -> String {
+        return self.tick(InputType::Left);
         //left move
     }
 
-    pub fn right_move(&mut self) {
-        self.tick(InputType::Right)
+    pub fn right_move(&mut self) -> String {
+        return self.tick(InputType::Right);
         //right move
     }
 
-    pub fn down_move(&mut self) {
-        self.tick(InputType::Down)
+    pub fn down_move(&mut self) -> String {
+        return self.tick(InputType::Down);
         //down move
     }
 
-    pub fn bomb_move(&mut self) {
-        self.tick(InputType::Bomb)
+    pub fn bomb_move(&mut self) -> String {
+        return self.tick(InputType::Bomb);
         //down move
     }
+
+    pub fn bombs(&self) -> String {
+        let serialized = serde_json::to_string(&self.bombs_vec).unwrap();
+        serialized
+    }
+
+    pub fn walls(&self) -> String {
+        let serialized = serde_json::to_string(&self.walls_vec).unwrap();
+        serialized
+    }
+
+    pub fn players(&self) -> String {
+        let serialized = serde_json::to_string(&self.players_vec).unwrap();
+        serialized
+    }
+
+
 }
 
 impl Universe {
@@ -144,54 +164,27 @@ impl Universe {
         return wall_check || bomb_check || player_check;
     }
 
-    // fn neighbors(&self, row: u32, column: u32) -> Vec<Cell> {
-	// 	let cels = self.cells.clone();
-	// 	let mut adj_sqrs: Vec<Cell> = Vec::new();
-	// 	let idx_u = self.get_index((row - 1) % self.height, column);
-	// 	adj_sqrs.push(cels[idx_u]);
-	// 	let idx_l = self.get_index(row, (column - 1) % self.width);
-	// 	adj_sqrs.push(cels[idx_l]);
-	// 	let idx_r = self.get_index(row, (column + 1) % self.width);
-	// 	adj_sqrs.push(cels[idx_r]);
-	// 	let idx_d = self.get_index((row + 1) % self.height, column);
-	// 	adj_sqrs.push(cels[idx_d]);
-	// 	adj_sqrs
-	// }
+    fn neighbors(&self, row: u32, column: u32) -> Vec<Cell> {
+		let cels = self.cells.clone();
+		let mut adj_sqrs: Vec<Cell> = Vec::new();
+		let idx_u = self.get_index((row - 1) % self.height, column);
+		adj_sqrs.push(cels[idx_u]);
+		let idx_l = self.get_index(row, (column - 1) % self.width);
+		adj_sqrs.push(cels[idx_l]);
+		let idx_r = self.get_index(row, (column + 1) % self.width);
+		adj_sqrs.push(cels[idx_r]);
+		let idx_d = self.get_index((row + 1) % self.height, column);
+		adj_sqrs.push(cels[idx_d]);
+		adj_sqrs
+	}
 }
 
 #[wasm_bindgen]
 impl Universe {
     // TODO: where do we create a new player?
-    pub fn tick(&mut self, input: InputType) {
-        // let mut next = self.cells.clone();
-
-        // for row in 0..self.height {
-        //     for col in 0..self.width {
-        //         let idx = self.get_index(row, col);
-        //         let cell = self.cells[idx];
-        //         let mut adj_sqrs: Vec<Cell> = self.neighbors(row, col); // < --- self.neighbors
-		// 		let u = adj_sqrs.pop().unwrap();
-		// 		let l = adj_sqrs.pop().unwrap();
-		// 		let r = adj_sqrs.pop().unwrap();
-		// 		let d = adj_sqrs.pop().unwrap();
-        //         // let live_neighbors = self.live_neighbor_count(row, col);
-
-        //         let next_cell = match (u, l, r, d, input, cell) {
-        //             (Cell::Player, _, _, _, InputType::Up, _) => Cell::Player,
-        //             (_, Cell::Player, _, _, InputType::Left, _) => Cell::Player,
-        //             (_, _, Cell::Player, _, InputType::Right, _) => Cell::Player,
-        //             (_, _, _, Cell::Player, InputType::Down, _) => Cell::Player,
-        //             (_, _, _, _, _, Cell::Player) => Cell::Empty,
-        //             (_, _, _, _, _, cell) => cell,
-        //         };
-
-        //         next[idx] = next_cell;
-        //     }
-        // }
-
-        // self.cells = next;
-
+    pub fn tick(&mut self, input: InputType) -> String {
         let mut plyrs = self.players_vec.clone();
+        let mut fail = false;
 
         for p in plyrs.iter_mut() {
             if p.host() == self.host {
@@ -201,8 +194,13 @@ impl Universe {
                     InputType::Right if !self.occupied(p.x() + 1, p.y()) => p.right(),
                     InputType::Down if !self.occupied(p.x(), p.y() - 1) => p.down(),
                     InputType::Bomb => p.drop_bomb(),
+                    _ => fail = true
                 }
             }
+        }
+
+        if fail {
+            return String::from("fail");
         }
 
         self.players_vec = plyrs;
@@ -243,10 +241,46 @@ impl Universe {
         self.players_vec = plyrs;
         self.walls_vec = walls;
 
-        // // if input type is bomb
-        // if input == InputType::Bomb {
-        //     // TODO: get player id and position to create new bomb and push to bombs_vec
+        return String::from("pass");
+
+        // let mut next = self.cells.clone();
+
+        // for row in 0..self.height {
+        //     for col in 0..self.width {
+        //         let idx = self.get_index(row, col);
+        //         let cell = self.cells[idx];
+                // let mut adj_sqrs: Vec<Cell> = self.neighbors(row, col); // < --- self.neighbors
+				// let u = adj_sqrs.pop().unwrap();
+				// let l = adj_sqrs.pop().unwrap();
+				// let r = adj_sqrs.pop().unwrap();
+				// let d = adj_sqrs.pop().unwrap();
+                // let live_neighbors = self.live_neighbor_count(row, col);
+                
+                // let walls = self.walls_vec.clone();
+                // let bombs = self.bombs_vec.clone();
+                // let players = self.players_vec.clone();
+
+                // for w in walls.iter() {
+                //     if w.y() == row && w.x() == col {
+
+                //     }
+                // }
+
+
+                // let next_cell = match (u, l, r, d, input, cell) {
+                //     (Cell::Player, _, _, _, InputType::Up, _) => Cell::Player,
+                //     (_, Cell::Player, _, _, InputType::Left, _) => Cell::Player,
+                //     (_, _, Cell::Player, _, InputType::Right, _) => Cell::Player,
+                //     (_, _, _, Cell::Player, InputType::Down, _) => Cell::Player,
+                //     (_, _, _, _, _, Cell::Player) => Cell::Empty,
+                //     (_, _, _, _, _, cell) => cell,
+                // };
+
+                // next[idx] = next_cell;
+        //     }
         // }
+
+        // self.cells = next;
 
 
         

@@ -1,11 +1,12 @@
 use rand::Rng;
+use serde::{Serialize, Deserialize};
 
 // Struct for Bombs
   // x: x coord
   // y: y coord
   // power: bomb power level
   // timer: count down to explosion
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct BombStruct {
   x: i32,
   y: i32,
