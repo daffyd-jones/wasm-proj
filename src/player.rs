@@ -14,7 +14,7 @@ use serde::{Serialize, Deserialize};
 #[derive(Copy, Clone, Serialize, Deserialize)]
 pub struct Player {
   // name: String,
-  host: bool,
+  id: i32,
   x: i32, 
   y: i32,
   bombs: i32,
@@ -25,8 +25,8 @@ pub struct Player {
 impl Player {
   
   // constructor for new players
-  pub fn new(host: bool, x: i32, y: i32, bombs: i32) -> Player {
-    Player {host: host, x: x, y: y, bombs: bombs, alive: true, hp: 5}
+  pub fn new(id: i32, x: i32, y: i32, bombs: i32) -> Player {
+    Player {id: id, x: x, y: y, bombs: bombs, alive: true, hp: 5}
   }
 
   // move character to specified coordinates.
@@ -90,15 +90,15 @@ impl Player {
     return (self.x == x) && (self.y == y)
   }
 
+  pub fn id(self) -> i32 {
+    return self.id;
+  }
+ 
   pub fn x(self) -> i32 {
     return self.x;
   }
 
   pub fn y(self) -> i32 {
     return self.y;
-  }
-
-  pub fn host(self) -> bool {
-    return self.host;
   }
 }
