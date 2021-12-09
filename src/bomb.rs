@@ -6,7 +6,7 @@ use serde::{Serialize, Deserialize};
   // y: y coord
   // power: bomb power level
   // timer: count down to explosion
-#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize, PartialEq)]
 pub struct BombStruct {
   x: i32,
   y: i32,
