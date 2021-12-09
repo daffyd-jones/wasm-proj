@@ -201,10 +201,6 @@ impl Universe {
                     InputType::Right if !self.occupied(p.x() + 1, p.y()) => p.right(),
                     InputType::Down if !self.occupied(p.x(), p.y() - 1) => p.down(),
                     InputType::Bomb => p.drop_bomb(),
-                    InputType::Up => p.up(),
-                    InputType::Left => p.left(),
-                    InputType::Right => p.right(),
-                    InputType::Down => p.down(),
                 }
             }
         }
