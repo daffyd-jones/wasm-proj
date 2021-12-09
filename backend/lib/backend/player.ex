@@ -12,6 +12,24 @@ defmodule Backend.Player do
               bombs: 10,
               hp: 0,
               alive: true
+    
+    def from_map(%{
+      "id" => id,
+      "x" => x,
+      "y" => y,
+      "bombs" => bombs,
+      "hp" => hp,
+      "alive" => alive
+    }) do
+      %State{
+        id: id,
+        x: x,
+        y: y,
+        bombs: bombs,
+        hp: hp,
+        alive: alive
+      }
+    end
   end
 
   ### Public API ###
@@ -55,7 +73,7 @@ defmodule Backend.Player do
 
   @impl true
   def handle_cast({:update_state, new_state}, _state) do
-    {:noreply, new_state}
+    {:noreply, State.from_map(new_state)}
   end
 
   @impl true

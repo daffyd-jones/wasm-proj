@@ -32,23 +32,23 @@ const createClient = (clientUUID) => {
         const msg = JSON.parse(e.data);
         const payload = msg.payload;
 
-        // Painful
+        console.log(msg);
+
+        // You gotta do what you gotta do
         if (payload.status && payload.status === "new_turn") {
             thingy.innerText = `It's currently Player ${payload.uuid}'s turn`;
         } else if (msg.event === "new_plr") {
-            
             if (payload.id === clientUUID) {
-                sendMsg(socket, "inspect_all", {});
+                sendMsg(socket, "inspect_state", {});
             } else {
                 client.state.players.push(payload);
             }
+        } else if (msg.event === "new_turn") {
+            client.state = payload.new_state;
         } else if (msg.event === "phx_reply") {
-
-            console.log(msg);
-            
             // Matching the response thingy for "inspect_all"
-            if (payload.response && Array.isArray(payload.response)) {
-                client.state.players = payload.response;
+            if (payload.response && payload.response.players) {
+                client.state = payload.response;
             }
         }
     }
@@ -57,6 +57,20 @@ const createClient = (clientUUID) => {
 }
 
 const funnyJsonPayload = (state) => {
+    state.bombs.push({
+        x: Math.random(),
+        y: Math.random(),
+        power: Math.random(),
+        timer: Math.random(),
+    });
+
+    state.walls.push({
+        x: Math.random(),
+        y: Math.random(),
+        destructible: false,
+        alive: true,
+    })
+    
     const thingy = {
         "alive": true,
         ...state

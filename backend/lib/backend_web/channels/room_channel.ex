@@ -51,17 +51,17 @@ defmodule BackendWeb.RoomChannel do
 
   @impl true
   def handle_in("inspect_state", _payload, socket) do
-    {:reply, :ok, socket}
+    {:reply, {:ok, State.inspect()}, socket}
   end
 
   @impl true
   def handle_in("finish_turn", payload, socket) do
     case State.finish_turn(socket.assigns.uuid, payload) do
       :not_your_turn -> nil
-      uuid -> 
+      next_player -> 
         broadcast_from socket, "new_turn",
           # sending status for testing purposes
-          %{status: :new_turn, uuid: uuid}
+          %{next_player: next_player, new_state: State.inspect()}
     end
     
     {:reply, :ok, socket}
