@@ -130,7 +130,7 @@ function socketEvents() {
         break;
       case "new_plr":
         let new_player = JSON.stringify(data.payload);
-        universe.new_player(new_player);
+        universe.add_player(new_player);
         break;
       case "new_turn":
         if (data.payload.next_player === universe.host_id()) {
@@ -332,6 +332,7 @@ function setEventListener() {
 function start() {
   setEventListener();
   universe.tick();
+  socketEvents();
   drawGrid();
   drawWalls(walls);
   drawPlayers(players);
