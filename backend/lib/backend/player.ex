@@ -52,10 +52,6 @@ defmodule Backend.Player do
     GenServer.cast(name(uuid), {:update_state, new_state})
   end
 
-  def update_pos(uuid, new_pos) do
-    GenServer.cast(name(uuid), {:update_pos, new_pos})
-  end
-
   ### GenServer ###
   
   @impl true
@@ -74,12 +70,5 @@ defmodule Backend.Player do
   @impl true
   def handle_cast({:update_state, new_state}, _state) do
     {:noreply, State.from_map(new_state)}
-  end
-
-  @impl true
-  def handle_cast({:update_pos, %{"x" => x, "y" => y}}, state) do
-    new_state = %{state | x: x, y: y}
-    Endpoint.broadcast("room:lobby", "new_pos", new_state)
-    {:noreply, new_state}
   end
 end

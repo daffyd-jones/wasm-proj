@@ -42,18 +42,6 @@ defmodule BackendWeb.RoomChannel do
   end
 
   @impl true
-  def handle_in("inspect", _payload, socket) do
-    state = Player.inspect(socket.assigns.uuid)
-    {:reply, {:ok, state}, socket}
-  end
-
-  @impl true
-  def handle_in("inspect_all", _payload, socket) do
-    plr_states = PlayerSupervisor.inspect_all()
-    {:reply, {:ok, plr_states}, socket}
-  end
-
-  @impl true
   def handle_in("inspect_state", _payload, socket) do
     {:reply, {:ok, State.inspect()}, socket}
   end
@@ -68,28 +56,5 @@ defmodule BackendWeb.RoomChannel do
     end
 
     {:reply, :ok, socket}
-  end
-
-  @impl true
-  def handle_in("update_pos", payload, socket) do
-    # Ignore the logging for update_pos since it
-    # spams IEX
-    Logger.disable(self())
-
-    %{"new_pos" => new_pos} = payload
-    Player.update_pos(socket.assigns.uuid, new_pos)
-
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_in("ping", payload, socket) do
-    {:reply, {:ok, payload}, socket}
-  end
-
-  @impl true
-  def handle_in("shout", payload, socket) do
-    broadcast socket, "shout", payload
-    {:noreply, socket}
   end
 end
