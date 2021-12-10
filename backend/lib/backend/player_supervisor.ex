@@ -16,8 +16,6 @@ defmodule Backend.PlayerSupervisor do
         pos = case PlayerSequence.inspect().players |> length() do
           1 -> %{x: 1, y: 1}
           2 -> %{x: 31, y: 31}
-          3 -> %{x: 1, y: 31}
-          4 -> %{x: 31, y: 1}
         end
 
         new_state = Map.merge(Player.inspect(uuid), pos)

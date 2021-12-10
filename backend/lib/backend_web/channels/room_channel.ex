@@ -12,8 +12,8 @@ defmodule BackendWeb.RoomChannel do
     %{"uuid" => uuid} = payload
     
     # Max 4 players
-    if PlayerSequence.inspect().players |> length() > 3 do
-      {:error, "too many players"}
+    if PlayerSequence.inspect().players |> length() > 1 do
+      {:error, "Only two players allowed"}
     else
       case PlayerSupervisor.start_player(uuid) do
         :ok ->
