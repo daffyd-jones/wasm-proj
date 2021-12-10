@@ -133,7 +133,6 @@ function socketEvents() {
           } else {
             console.error("Join failed!");
           }
-        //} else if (data.ref === inspectionRef) {
         } else if (data.ref === inspectionRef) {
           const payload = data.payload;
           // Response for "inspect_state"
@@ -213,6 +212,14 @@ function socketEvents() {
         drawWalls(walls);
         drawPlayers(players);
         drawBombs(bombs);
+        break;
+
+      case "plr_wins":
+        if (data.payload.winner_id === universe.host_id()) {
+          alert("You won!");
+        } else {
+          alert("You lost!");
+        }
         break;
     }
   });
@@ -496,7 +503,13 @@ function setEventListener() {
           pbw, 
           refMake()
         );
-        socket.send(turnMessage);
+        socket.send(JSON.stringify(turnMessage));
+
+        // Win handling
+        if (win) {
+          let winMessage = PhoenixEvent("win", "room:lobby", { winner_id: universe.host_id() });
+          socket.send(JSON.stringify(winMessage));
+        }
       }
 
       walls = JSON.parse(universe.walls());
