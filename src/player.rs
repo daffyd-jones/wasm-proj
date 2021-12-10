@@ -93,6 +93,10 @@ impl Player {
   pub fn id(self) -> i32 {
     return self.id;
   }
+
+  pub fn is_alive(self) -> bool {
+    return self.alive;
+  }
  
   pub fn x(self) -> i32 {
     return self.x;

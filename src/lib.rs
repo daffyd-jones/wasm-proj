@@ -234,7 +234,7 @@ impl Universe {
         for p in plyrs.iter_mut() {
             if p.id() == self.host_id {
                 match input {
-                    InputType::Up if !self.occupied(p.x(), p.y() - 1) => p.up(),
+                    InputType::Up if !self.occupied(p.x(), p.y() + 1) => p.up(),
                     InputType::Left if !self.occupied(p.x() - 1, p.y()) => p.left(),
                     InputType::Right if !self.occupied(p.x() + 1, p.y()) => p.right(),
                     InputType::Down if !self.occupied(p.x(), p.y() - 1) => p.down(),
@@ -293,6 +293,17 @@ impl Universe {
         self.bombs_vec = bombs;
         self.players_vec = plyrs;
         self.walls_vec = walls;
+
+        let plyrs = self.players_vec.clone();
+        for p in plyrs.iter() {
+            if !p.is_alive() {
+                if p.id() == self.host_id {
+                    return String::from("lose");
+                } else {
+                    return String::from("win");
+                }
+            }
+        }
 
         return String::from("pass"); 
     }
