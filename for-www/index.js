@@ -6,9 +6,9 @@ const GRID_COLOR = "#CCCCCC";
 const GRID_FILL = "2e7700";
 
 // Load images
-const playerImgOne = new Image();
+let playerImgOne = new Image();
 playerImgOne.src = "./images/player1.png";
-const playerImgTwo = new Image();
+let playerImgTwo = new Image();
 playerImgTwo.src = "./images/player2.png";
 const bombOne = new Image();
 bombOne.src = "./images/bomb1.png";
@@ -30,6 +30,9 @@ const bombSound = new sound("sounds/bomb.wav");
 const bPlant = new sound("sounds/plant.wav");
 const background = new sound("sounds/background.mp3");
 let wasOne = false;
+
+let win = false;
+let lose = false;
 
 // Construct the universe, and get its width and height.
 const universe = Universe.new();
@@ -253,7 +256,7 @@ const drawWalls = (walls) => {
 const drawPlayers = (players) => {
   players.forEach((player) => {
     if (player.alive) {
-      if (player.id != 2) {
+      if (player.id == universe.host_id()) {
         ctx.drawImage(
           playerImgOne,
           player.x * (CELL_SIZE + 1) + 1,
@@ -277,32 +280,32 @@ const drawBombs = (bombs) => {
   }
   bombs.forEach((bomb) => {
     console.log(bomb.timer)
-    if (bomb.timer == 1) {
+    if (Math.ceil(bomb.timer/2) == 1) {
       wasOne = true;
       ctx.drawImage(
         bombOne,
         bomb.x * (CELL_SIZE + 1) + 1,
         bomb.y * (CELL_SIZE + 1) + 1
       );
-    } else if (bomb.timer == 2) {
+    } else if (Math.ceil(bomb.timer/2) == 2) {
       ctx.drawImage(
         bombTwo,
         bomb.x * (CELL_SIZE + 1) + 1,
         bomb.y * (CELL_SIZE + 1) + 1
       );
-    } else if (bomb.timer == 3) {
+    } else if (Math.ceil(bomb.timer/2) == 3) {
       ctx.drawImage(
         bombThree,
         bomb.x * (CELL_SIZE + 1) + 1,
         bomb.y * (CELL_SIZE + 1) + 1
       );
-    } else if (bomb.timer == 4) {
+    } else if (Math.ceil(bomb.timer/2) == 4) {
       ctx.drawImage(
         bombFour,
         bomb.x * (CELL_SIZE + 1) + 1,
         bomb.y * (CELL_SIZE + 1) + 1
       );
-    } else if (bomb.timer == 5) {
+    } else if (Math.ceil(bomb.timer/2) == 5) {
       ctx.drawImage(
         bombFive,
         bomb.x * (CELL_SIZE + 1) + 1,
@@ -311,7 +314,7 @@ const drawBombs = (bombs) => {
     }
   });
 };
-console.log(check);
+// console.log(check);
 
 function sound(src) {
   this.sound = document.createElement("audio");
@@ -357,6 +360,18 @@ function setEventListener() {
               yourTurn = false;
               walkSound.play();
               break;
+            case "lose":
+              console.log("you lose");
+              const playerImgOne = new Image();
+              playerImgOne.src = "./images/player1-dead.png";
+              lose = true;
+              break;
+            case "win":
+              console.log("you win");
+              const playerImgTwo = new Image();
+              playerImgTwo.src = "./images/player2-dead.png";
+              win = true;
+              break;
           }
           break;
         case "ArrowUp":
@@ -370,6 +385,18 @@ function setEventListener() {
               console.log("move successful");
               yourTurn = false;
               walkSound.play();
+              break;
+            case "lose":
+              console.log("you lose");
+              const playerImgOne = new Image();
+              playerImgOne.src = "./images/player1-dead.png";
+              lose = true;
+              break;
+            case "win":
+              console.log("you win");
+              const playerImgTwo = new Image();
+              playerImgTwo.src = "./images/player2-dead.png";
+              win = true;
               break;
           }
           break;
@@ -385,6 +412,18 @@ function setEventListener() {
               walkSound.play();
               yourTurn = false;
               break;
+            case "lose":
+              console.log("you lose");
+              const playerImgOne = new Image();
+              playerImgOne.src = "./images/player1-dead.png";
+              lose = true;
+              break;
+            case "win":
+              console.log("you win");
+              const playerImgTwo = new Image();
+              playerImgTwo.src = "./images/player2-dead.png";
+              win = true;
+              break;
           }
           break;
         case "ArrowRight":
@@ -399,6 +438,18 @@ function setEventListener() {
               walkSound.play();
               yourTurn = false;
               break;
+            case "lose":
+              console.log("you lose");
+              const playerImgOne = new Image();
+              playerImgOne.src = "./images/player1-dead.png";
+              lose = true;
+              break;
+            case "win":
+              console.log("you win");
+              const playerImgTwo = new Image();
+              playerImgTwo.src = "./images/player2-dead.png";
+              win = true;
+              break;
           }
           break;
         case "b":
@@ -412,6 +463,18 @@ function setEventListener() {
               bPlant.play();
               console.log("move successful");
               break;
+            case "lose":
+              console.log("you lose");
+              const playerImgOne = new Image();
+              playerImgOne.src = "./images/player1-dead.png";
+              lose = true;
+              break;
+            case "win":
+              console.log("you win");
+              const playerImgTwo = new Image();
+              playerImgTwo.src = "./images/player2-dead.png";
+              win = true;
+              break;
           }
           break;
         default:
@@ -419,6 +482,9 @@ function setEventListener() {
           return;
       }
       event.preventDefault();
+
+      console.log(win);
+      console.log(lose);
       
       // Successful turn
       if (!yourTurn) {

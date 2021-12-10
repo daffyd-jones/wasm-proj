@@ -328,6 +328,18 @@ impl Universe {
         self.players_vec = plyrs;
         self.walls_vec = walls;
 
+        let plyrs = self.players_vec.clone();
+
+        for p in plyrs.iter() {
+            if !p.is_alive() {
+                if p.id() == self.host_id {
+                    return String::from("lose");
+                } else {
+                    return String::from("win");
+                }
+            }
+        }
+
         return String::from("pass"); 
     }
 
