@@ -503,12 +503,12 @@ function setEventListener() {
           pbw, 
           refMake()
         );
-        socket.send(JSON.stringify(turnMessage));
+        socket.send(turnMessage);
 
         // Win handling
         if (win) {
           let winMessage = PhoenixEvent("win", "room:lobby", { winner_id: universe.host_id() });
-          socket.send(JSON.stringify(winMessage));
+          socket.send(winMessage);
         }
       }
 
