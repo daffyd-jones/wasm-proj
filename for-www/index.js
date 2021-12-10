@@ -121,7 +121,6 @@ function socketEvents() {
           }
         //} else if (data.ref === inspectionRef) {
         } else {
-
           const payload = data.payload;
           // Response for "inspect_state"
           if (payload.status === "ok" && payload.response.players) {
@@ -131,6 +130,16 @@ function socketEvents() {
             
             if (state.players.length !== 1) {
               insertPlayersBombsWalls(state);
+              
+              walls = JSON.parse(universe.walls());
+              players = JSON.parse(universe.players());
+              bombs = JSON.parse(universe.bombs());
+
+              clearGrid();
+              drawGrid();
+              drawWalls(walls);
+              drawPlayers(players);
+              drawBombs(bombs);
             } else {
               yourTurn = true;
               // Dumb hack so the first client saves the state to the server
@@ -153,12 +162,18 @@ function socketEvents() {
 
         let new_player = JSON.stringify(data.payload);
         universe.add_player(new_player);
+
+        players = JSON.parse(universe.players());
+
+        clearGrid();
         drawGrid();
         drawWalls(walls);
         drawPlayers(players);
         drawBombs(bombs);
         break;
       case "new_turn":
+        console.log(`It is ${data.payload.next_player}'s turn`);
+
         if (data.payload.next_player === universe.host_id()) {
           yourTurn = true;
         }
@@ -169,6 +184,7 @@ function socketEvents() {
         bombs = JSON.parse(universe.bombs());
         players = JSON.parse(universe.players());
         
+        clearGrid();
         drawGrid();
         drawWalls(walls);
         drawPlayers(players);
@@ -265,7 +281,7 @@ function setEventListener() {
   window.addEventListener(
     "keydown",
     function (event) {
-      //if (!yourTurn) return;
+      if (!yourTurn) return;
 
       if (event.defaultPrevented) {
         return;
