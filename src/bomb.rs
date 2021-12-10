@@ -21,7 +21,7 @@ impl BombStruct {
     // Generate a random number between 1 and 5 to be the power and timer
     let mut rng = rand::thread_rng();
     let rand_pow_time = rng.gen_range(2..7);
-    BombStruct { x: x, y: y, power: rand_pow_time, timer: rand_pow_time - 1 }
+    BombStruct { x: x, y: y, power: rand_pow_time, timer: rand_pow_time }
   }
 
   // Get vector of tuples containing all exploded tiles.
