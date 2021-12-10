@@ -215,6 +215,7 @@ function socketEvents() {
         break;
 
       case "plr_wins":
+        console.log(data.payload.winner_id)
         if (data.payload.winner_id === universe.host_id()) {
           alert("You won!");
         } else {
@@ -379,6 +380,7 @@ function setEventListener() {
               const playerImgTwo = new Image();
               playerImgTwo.src = "./images/player2-dead.png";
               win = true;
+              yourTurn = false;
               break;
           }
           break;
@@ -398,6 +400,7 @@ function setEventListener() {
               console.log("you lose");
               const playerImgOne = new Image();
               playerImgOne.src = "./images/player1-dead.png";
+              yourTurn = false;
               lose = true;
               break;
             case "win":
@@ -405,6 +408,7 @@ function setEventListener() {
               const playerImgTwo = new Image();
               playerImgTwo.src = "./images/player2-dead.png";
               win = true;
+              yourTurn = false;
               break;
           }
           break;
@@ -425,12 +429,14 @@ function setEventListener() {
               const playerImgOne = new Image();
               playerImgOne.src = "./images/player1-dead.png";
               lose = true;
+              yourTurn = false;
               break;
             case "win":
               console.log("you win");
               const playerImgTwo = new Image();
               playerImgTwo.src = "./images/player2-dead.png";
               win = true;
+              yourTurn = false;
               break;
           }
           break;
@@ -451,12 +457,14 @@ function setEventListener() {
               const playerImgOne = new Image();
               playerImgOne.src = "./images/player1-dead.png";
               lose = true;
+              yourTurn = false;
               break;
             case "win":
               console.log("you win");
               const playerImgTwo = new Image();
               playerImgTwo.src = "./images/player2-dead.png";
               win = true;
+              yourTurn = false;
               break;
           }
           break;
@@ -476,12 +484,14 @@ function setEventListener() {
               const playerImgOne = new Image();
               playerImgOne.src = "./images/player1-dead.png";
               lose = true;
+              yourTurn = false;
               break;
             case "win":
               console.log("you win");
               const playerImgTwo = new Image();
               playerImgTwo.src = "./images/player2-dead.png";
               win = true;
+              yourTurn = false;
               break;
           }
           break;
@@ -507,7 +517,7 @@ function setEventListener() {
 
         // Win handling
         if (win) {
-          let winMessage = PhoenixEvent("win", "room:lobby", { winner_id: universe.host_id() });
+          let winMessage = PhoenixEvent("win", "room:lobby", { winner_id: universe.host_id() }, refMake());
           socket.send(winMessage);
         }
       }

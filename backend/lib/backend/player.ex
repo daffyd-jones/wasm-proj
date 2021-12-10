@@ -9,7 +9,7 @@ defmodule Backend.Player do
               x: 1,
               y: 1,
               bombs: 10,
-              hp: 0,
+              hp: 5,
               alive: true
     
     def from_map(%{
