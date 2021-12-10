@@ -50,7 +50,7 @@ defmodule BackendWeb.RoomChannel do
   def handle_in("win", payload, socket) do
     %{"winner_id" => winner_id} = payload
     broadcast socket, "plr_wins", winner_id
-    {:reply, ok, socket}
+    {:reply, :ok, socket}
   end
 
   @impl true
