@@ -26,8 +26,12 @@ pub struct WallStruct {
         return self.x;
       }
     
-      pub fn y(self) -> i32 {
-        return self.y;
-      }
+    pub fn y(self) -> i32 {
+      return self.y;
+    }
+
+    pub fn is_alive(self) -> bool {
+      return self.alive;
+    }
 
   }

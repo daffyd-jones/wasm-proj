@@ -115,7 +115,39 @@ const drawPlayers = (players) => {
 };
 
 const drawBombs = (bombs) => {
-  bombs.forEach((bomb) => {});
+  bombs.forEach((bomb) => {
+    if (bomb.timer == 1) {
+      ctx.drawImage(
+        bombOne,
+        bomb.x * (CELL_SIZE + 1) + 1,
+        bomb.y * (CELL_SIZE + 1) + 1
+      );
+    } else if (bomb.timer == 2) {
+      ctx.drawImage(
+        bombTwo,
+        bomb.x * (CELL_SIZE + 1) + 1,
+        bomb.y * (CELL_SIZE + 1) + 1
+      );
+    } else if (bomb.timer == 3) {
+      ctx.drawImage(
+        bombThree,
+        bomb.x * (CELL_SIZE + 1) + 1,
+        bomb.y * (CELL_SIZE + 1) + 1
+      );
+    } else if (bomb.timer == 4) {
+      ctx.drawImage(
+        bombFour,
+        bomb.x * (CELL_SIZE + 1) + 1,
+        bomb.y * (CELL_SIZE + 1) + 1
+      );
+    } else if (bomb.timer == 5) {
+      ctx.drawImage(
+        bombFive,
+        bomb.x * (CELL_SIZE + 1) + 1,
+        bomb.y * (CELL_SIZE + 1) + 1
+      );
+    }
+  });
 };
 
 function setEventListener() {
@@ -195,7 +227,9 @@ function setEventListener() {
       walls = JSON.parse(universe.walls());
       bombs = JSON.parse(universe.bombs());
       players = JSON.parse(universe.players());
-      console.log(bombs);
+      console.log(walls);
+      // let occupied = JSON.parse(universe.occupy());
+      // console.log(occupied);
       clearGrid();
       drawGrid();
       drawWalls(walls);

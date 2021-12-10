@@ -57,9 +57,9 @@ pub struct Universe {
     height: u32,
     cells: Vec<Cell>,
     bombs_vec: Vec<BombStruct>,
-    bombs_locations: Vec<BombGrid>,
     players_vec: Vec<Player>,
-    walls_vec: Vec<WallStruct>
+    walls_vec: Vec<WallStruct>,
+    occupy_check: Vec<bool>,
 }
 
 impl Universe {
@@ -145,17 +145,21 @@ impl Universe {
         self.bombs_vec = deserialized;
     }
 
-
+    pub fn occupy(&self) -> String {
+        let serialized = serde_json::to_string(&self.occupy_check).unwrap();
+        serialized
+    }
 }
 
 impl Universe {
     // ...
 
 
-    fn occupied(&self, col: i32, row: i32) -> bool {
+    fn occupied(&mut self, col: i32, row: i32) -> bool {
         let mut bomb_check = false;
         let mut wall_check = false;
         let mut player_check = false;
+        let mut checks: Vec<bool> = Vec::new();
 
         let bombs = self.bombs_vec.clone();
         let walls = self.walls_vec.clone();
@@ -178,6 +182,12 @@ impl Universe {
                 player_check = true;
             }
         }
+        
+        checks.push(bomb_check);
+        checks.push(wall_check);
+        checks.push(player_check);
+
+        self.occupy_check = checks;
         
         return wall_check || bomb_check || player_check;
     }
@@ -256,6 +266,7 @@ impl Universe {
         let mut bombs = self.bombs_vec.clone();
 
         let mut dead_bombs: Vec<usize> = Vec::new();
+        let mut dead_walls: Vec<usize> = Vec::new();
         let mut idx = 0;
         // tick down bombs
         for b in bombs.iter_mut() {
@@ -279,6 +290,9 @@ impl Universe {
                         let wy = &walls[j].y();
                         if (wx, wy) == (x , y) {
                             walls[j].is_bombed();
+                            if !walls[j].is_alive() {
+                                dead_walls.push(j);
+                            }
                         }
                     }
                 } 
@@ -291,6 +305,11 @@ impl Universe {
         for i in dead_bombs.iter() {
             bombs.remove(*i);
         }
+
+        for j in dead_walls.iter() {
+            walls.remove(*j);
+        }
+
         self.bombs_vec = bombs;
         self.players_vec = plyrs;
         self.walls_vec = walls;
@@ -338,14 +357,9 @@ impl Universe {
                 }
             })
             .collect();
-
-        let bombs_locations = (0..width * height)
-            .map(|i| {
-                BombGrid::Empty
-            })
-            .collect();
         
         let bombs_vec: Vec<BombStruct> = Vec::new();
+        let occupy_check: Vec<bool> = Vec::new();
 
         let mut rng = rand::thread_rng();
         let num = rng.gen::<i32>();
@@ -375,13 +389,13 @@ impl Universe {
                         walls_vec.push(WallStruct::new(i, j, false, true))
                     }
                 }
-                // add indestructible walls
+                // add destructible walls
                 else if i != 1 && i != width - 2 && j != 1 && j != height - 2 {
-                    let rand_no_wall_i = rng.gen_range(2..width - 2);
-                    let rand_no_wall_j = rng.gen_range(2..height - 2);
-                    if i != rand_no_wall_i && j != rand_no_wall_j {
+                    // let rand_no_wall_i = rng.gen_range(2..width - 2);
+                    // let rand_no_wall_j = rng.gen_range(2..height - 2);
+                    // if i != rand_no_wall_i && j != rand_no_wall_j {
                         walls_vec.push(WallStruct::new(i, j, true, true))
-                    }
+                    // }
                 }
             }
         }
@@ -392,9 +406,9 @@ impl Universe {
             height: 33,
             cells,
             bombs_vec,
-            bombs_locations,
             players_vec,
-            walls_vec
+            walls_vec,
+            occupy_check,
         }
     }
 
