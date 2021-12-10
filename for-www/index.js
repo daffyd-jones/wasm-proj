@@ -6,10 +6,14 @@ const GRID_COLOR = "#CCCCCC";
 const GRID_FILL = "2e7700";
 
 // Load images
-const playerImgOne = new Image();
+let playerImgOne = new Image();
 playerImgOne.src = "./images/player1.png";
-const playerImgTwo = new Image();
+const playerImgOneDead = new Image();
+playerImgOneDead.src = "./images/player1-dead.png";
+let playerImgTwo = new Image();
 playerImgTwo.src = "./images/player2.png";
+const playerImgTwoDead = new Image();
+playerImgTwoDead.src = "./images/player2-dead.png";
 const bombOne = new Image();
 bombOne.src = "./images/bomb1.png";
 const bombTwo = new Image();
@@ -253,7 +257,7 @@ const drawWalls = (walls) => {
 const drawPlayers = (players) => {
   players.forEach((player) => {
     if (player.alive) {
-      if (player.id != 2) {
+      if (player.id == universe.host_id()) {
         ctx.drawImage(
           playerImgOne,
           player.x * (CELL_SIZE + 1) + 1,
@@ -311,7 +315,7 @@ const drawBombs = (bombs) => {
     }
   });
 };
-console.log(check);
+// console.log(check);
 
 function sound(src) {
   this.sound = document.createElement("audio");
@@ -357,6 +361,14 @@ function setEventListener() {
               yourTurn = false;
               walkSound.play();
               break;
+            case "lose":
+              console.log("you lose");
+              playerImgOne = playerImgOneDead;
+              break;
+            case "win":
+              console.log("you win");
+              playerImgTwo = playerImgTwoDead;
+              break;
           }
           break;
         case "ArrowUp":
@@ -370,6 +382,14 @@ function setEventListener() {
               console.log("move successful");
               yourTurn = false;
               walkSound.play();
+              break;
+            case "lose":
+              console.log("you lose");
+              playerImgOne = playerImgOneDead;
+              break;
+            case "win":
+              console.log("you win");
+              playerImgTwo = playerImgTwoDead;
               break;
           }
           break;
@@ -385,6 +405,14 @@ function setEventListener() {
               walkSound.play();
               yourTurn = false;
               break;
+            case "lose":
+              console.log("you lose");
+              playerImgOne = playerImgOneDead;
+              break;
+            case "win":
+              console.log("you win");
+              playerImgTwo = playerImgTwoDead;
+              break;
           }
           break;
         case "ArrowRight":
@@ -399,6 +427,14 @@ function setEventListener() {
               walkSound.play();
               yourTurn = false;
               break;
+            case "lose":
+              console.log("you lose");
+              playerImgOne = playerImgOneDead;
+              break;
+            case "win":
+              console.log("you win");
+              playerImgTwo = playerImgTwoDead;
+              break;
           }
           break;
         case "b":
@@ -411,6 +447,14 @@ function setEventListener() {
             case "pass":
               bPlant.play();
               console.log("move successful");
+              break;
+            case "lose":
+              console.log("you lose");
+              playerImgOne = playerImgOneDead;
+              break;
+            case "win":
+              console.log("you win");
+              playerImgTwo = playerImgTwoDead;
               break;
           }
           break;

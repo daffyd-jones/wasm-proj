@@ -135,6 +135,11 @@ impl Universe {
         serialized
     }
 
+    // pub fn host_id_ser(&self) -> String {
+    //     let serialized = serde_json::to_string(&self.host_id).unwrap();
+    //     serialized
+    // }
+
     pub fn set_players(&mut self, players: String) {
         let deserialized: Vec<Player> = serde_json::from_str(&players).unwrap();
         self.players_vec = deserialized;
@@ -327,6 +332,18 @@ impl Universe {
         self.bombs_vec = bombs;
         self.players_vec = plyrs;
         self.walls_vec = walls;
+
+        let plyrs = self.players_vec.clone();
+
+        for p in plyrs.iter() {
+            if !p.is_alive() {
+                if p.id() == self.host_id {
+                    return String::from("lose");
+                } else {
+                    return String::from("win");
+                }
+            }
+        }
 
         return String::from("pass"); 
     }
