@@ -25,6 +25,11 @@ wallImgDes.src = "./images/wall-destructable.png";
 const wallImgSolid = new Image();
 wallImgSolid.onload = start;
 wallImgSolid.src = "./images/wall-solid.png";
+const walkSound = new sound("sounds/walk.wav");
+const bombSound = new sound("sounds/bomb.wav");
+const bPlant = new sound("sounds/plant.wav");
+const background = new sound("sounds/background.mp3");
+let wasOne = false;
 
 // Construct the universe, and get its width and height.
 const universe = Universe.new();
@@ -35,6 +40,7 @@ const height = universe.height();
 let walls = JSON.parse(universe.walls());
 let players = JSON.parse(universe.players());
 let bombs = JSON.parse(universe.bombs());
+console.log(universe.explosions());
 
 // Give the canvas room for all of our cells and a 1px border
 // around each of them.
@@ -265,8 +271,14 @@ const drawPlayers = (players) => {
 };
 
 const drawBombs = (bombs) => {
+  if (bombs.length == 0 && wasOne == true) {
+    bombSound.play();
+    wasOne = false;
+  }
   bombs.forEach((bomb) => {
+    console.log(bomb.timer)
     if (bomb.timer == 1) {
+      wasOne = true;
       ctx.drawImage(
         bombOne,
         bomb.x * (CELL_SIZE + 1) + 1,
@@ -299,11 +311,33 @@ const drawBombs = (bombs) => {
     }
   });
 };
+console.log(check);
+
+function sound(src) {
+  this.sound = document.createElement("audio");
+  this.sound.src = src;
+  this.sound.setAttribute("preload", "auto");
+  this.sound.setAttribute("controls", "none");
+  this.sound.style.display = "none";
+  document.body.appendChild(this.sound);
+  this.play = function () {
+    this.sound.play();
+  }
+  this.stop = function () {
+    this.sound.pause();
+  }
+  this.loop = function () {
+    this.sound.setAttribute("volume", "0.5");
+    this.sound.play();
+    this.sound.loop = true;
+  }
+}
 
 function setEventListener() {
   window.addEventListener(
     "keydown",
     function (event) {
+      background.loop();
       if (!yourTurn) return;
 
       if (event.defaultPrevented) {
@@ -321,6 +355,7 @@ function setEventListener() {
             case "pass":
               console.log("move successful");
               yourTurn = false;
+              walkSound.play();
               break;
           }
           break;
@@ -334,6 +369,7 @@ function setEventListener() {
             case "pass":
               console.log("move successful");
               yourTurn = false;
+              walkSound.play();
               break;
           }
           break;
@@ -346,6 +382,7 @@ function setEventListener() {
               break;
             case "pass":
               console.log("move successful");
+              walkSound.play();
               yourTurn = false;
               break;
           }
@@ -359,6 +396,7 @@ function setEventListener() {
               break;
             case "pass":
               console.log("move successful");
+              walkSound.play();
               yourTurn = false;
               break;
           }
@@ -371,6 +409,7 @@ function setEventListener() {
               console.log("move failed, cell occupied");
               break;
             case "pass":
+              bPlant.play();
               console.log("move successful");
               break;
           }
