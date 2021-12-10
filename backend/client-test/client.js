@@ -36,30 +36,29 @@ socket.onmessage = (e) => {
     const msg = JSON.parse(e.data);
     const payload = msg.payload;
 
-    console.log(msg);
-
     switch (msg.event) {
         case "new_plr":
             const newPlayer = payload;
             
             // bruh
-            if (newPlayer.uuid === clientUUID) {
+            if (newPlayer.id === clientUUID) {
                 sendMsg("inspect_all", {});
             } else {
                 players.push(newPlayer);
             }
             break;
         case "new_pos":
-            if (msg.payload.uuid === clientUUID) return;
-            const player = findPlayer(payload.uuid);
-            player.pos = payload.pos;
+            if (payload.id === clientUUID) return;
+            const player = findPlayer(payload.id);
+            player.x = payload.x;
+            player.y = payload.y;
             break;
         case "phx_reply":
             // ;_; would be nice if javascript had pattern matching
             if (payload.response && Array.isArray(payload.response)) {
                 players = payload.response;
                 clientPlayer = findPlayer(clientUUID);
-                requestAnimationFrame(draw)
+                requestAnimationFrame(draw);
             }
             break;
     }
@@ -115,7 +114,7 @@ window.onkeyup = (e) => {
 }
 
 const findPlayer = (uuid) => {
-    return players.find((plr) => plr.uuid === uuid);
+    return players.find((plr) => plr.id === uuid);
 }
 
 const draw = () => {
@@ -125,7 +124,7 @@ const draw = () => {
 
     for (let i = 0; i < players.length; i++) {
         const player = players[i];
-        drawSquare(player.pos.x, player.pos.y, 40);
+        drawSquare(player.x, player.y, 40);
     }
 
     requestAnimationFrame(draw);
@@ -133,15 +132,15 @@ const draw = () => {
 
 const moveRate = 3;
 const updatePlr = () => {
-    if (keyboard.left) clientPlayer.pos.x -= moveRate;
-    else if (keyboard.right) clientPlayer.pos.x += moveRate;
-    if (keyboard.up) clientPlayer.pos.y -= moveRate;
-    else if (keyboard.down) clientPlayer.pos.y += moveRate;
+    if (keyboard.left) clientPlayer.x -= moveRate;
+    else if (keyboard.right) clientPlayer.x += moveRate;
+    if (keyboard.up) clientPlayer.y -= moveRate;
+    else if (keyboard.down) clientPlayer.y += moveRate;
 
     sendMsg("update_pos", {
         new_pos: {
-            x: clientPlayer.pos.x,
-            y: clientPlayer.pos.y,
+            x: clientPlayer.x,
+            y: clientPlayer.y,
         },
     });
 }

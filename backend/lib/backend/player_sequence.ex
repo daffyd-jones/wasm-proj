@@ -41,10 +41,15 @@ defmodule Backend.PlayerSequence do
   end
 
   def handle_call(:inspect, _from, state), do: {:reply, state, state}
+  
 
   @impl true
   def handle_call(:current_plr, _from, state) do
-    {:reply, state.current, state}
+    current_plr = case state.current do
+      nil -> state.players |> Enum.at(0)
+      current -> current
+    end
+    {:reply, current_plr, state}
   end
   
   defp get_new_current(state) do
@@ -79,9 +84,15 @@ defmodule Backend.PlayerSequence do
 
   @impl true
   def handle_cast({:add_plr, uuid}, state) do
+    new_players = state.players ++ [uuid]
+    new_current = case state.current do
+      nil -> uuid
+      current -> current
+    end
+
     new_state = %PlayerSequence{
-      state |
-      players: state.players ++ [uuid]
+      current: new_current,
+      players: new_players
     }
     {:noreply, new_state}
   end

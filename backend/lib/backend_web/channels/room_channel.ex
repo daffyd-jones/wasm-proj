@@ -49,18 +49,19 @@ defmodule BackendWeb.RoomChannel do
     {:reply, {:ok, plr_states}, socket}
   end
 
-  # Still unclear on how game stuff works still
-  # I presume that the player will send its 
-  # entire internal state to the server
   @impl true
-  def handle_in("next_turn", payload, socket) do
-    # Payload is just %{"uuid" => whatever} for now
-    case State.next_turn(payload) do
+  def handle_in("inspect_state", _payload, socket) do
+    {:reply, {:ok, State.inspect()}, socket}
+  end
+
+  @impl true
+  def handle_in("finish_turn", payload, socket) do
+    case State.finish_turn(socket.assigns.uuid, payload) do
       :not_your_turn -> nil
-      uuid -> 
+      next_player -> 
         broadcast_from socket, "new_turn",
           # sending status for testing purposes
-          %{status: :new_turn, uuid: uuid}
+          %{next_player: next_player, new_state: State.inspect()}
     end
     
     {:reply, :ok, socket}

@@ -17,6 +17,11 @@ defmodule Backend.PlayerSupervisor do
     DynamicSupervisor.init(strategy: :one_for_one)
   end
 
+  def update_plrs(new_states) do
+    new_states
+    |> Enum.each(fn x -> Player.update_state(x["id"], x) end)
+  end
+
   def inspect_all() do
     DynamicSupervisor.which_children(__MODULE__)
     |> Enum.map(fn {_, pid, _, _} -> Player.inspect(pid) end)

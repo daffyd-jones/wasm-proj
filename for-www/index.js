@@ -44,6 +44,15 @@ canvas.width = (CELL_SIZE + 1) * width + 1;
 
 const ctx = canvas.getContext("2d");
 
+const socket = new WebSocket("ws://localhost:4000/socket/websocket");
+
+const refMake = () => Math.floor(Math.random() * 9999999);
+
+let joined = false;
+const joinResponseRef = refMake();
+let yourTurn = false;
+let inspectionRef = 0;
+
 const drawGrid = () => {
   ctx.beginPath();
   ctx.strokeStyle = GRID_COLOR;
@@ -233,14 +242,27 @@ function setEventListener() {
           return;
       }
       event.preventDefault();
+
+      // If a move was successfully made...
+      if (!yourTurn) {
+        let pbw = extractPlayersBombsWalls();
+        let turnMessage = PhoenixEvent(
+          "finish_turn",
+          "room:lobby",
+          JSON.stringify(pbw),
+          refMake()
+        );
+        socket.send(turnMessage);
+      }
+
       walls = JSON.parse(universe.walls());
       bombs = JSON.parse(universe.bombs());
       players = JSON.parse(universe.players());
-      console.log(walls);
-      let occupied = JSON.parse(universe.occupy());
-      console.log(occupied);
-      let explosions = JSON.parse(universe.explosions());
-      console.log(explosions);
+      // console.log(walls);
+      // let occupied = JSON.parse(universe.occupy());
+      // console.log(occupied);
+      // let explosions = JSON.parse(universe.explosions());
+      // console.log(explosions);
       clearGrid();
       drawGrid();
       drawWalls(walls);
@@ -257,4 +279,82 @@ function start() {
   drawGrid();
   drawWalls(walls);
   drawPlayers(players);
+}
+
+function PhoenixEvent(event, topic, payload, ref) {
+  return {
+    event: event,
+    topic: topic,
+    payload: payload,
+    ref: ref,
+  };
+}
+
+function extractPlayersBombsWalls() {
+  return {
+    players: JSON.parse(universe.players()),
+    bombs: JSON.parse(universe.bombs()),
+    walls: JSON.parse(universe.walls()),
+  };
+}
+
+function insertPlayersBombsWalls(new_state) {
+  universe.set_players(JSON.stringify(new_state.players));
+  universe.set_bombs(JSON.stringify(new_state.bombs));
+  universe.set_walls(JSON.stringify(new_state.walls));
+}
+
+function socketEvents() {
+  socket.addEventListener("open", (e) => {
+    console.log("Attempting join...");
+    let message = PhoenixEvent(
+      "phx_join",
+      "room:lobby",
+      JSON.stringify({ uuid: universe.host_id() }),
+      joinResponseRef
+    );
+    socket.send(message);
+  });
+
+  socket.addEventListener("message", (event) => {
+    let data = JSON.parse(event.data);
+    switch (data.event) {
+      case "phx_reply":
+        if (!joined && data.ref === joinResponseRef) {
+          if (data.payload.status === "ok") {
+            // Join confirmed.
+            joined = true;
+            inspectionRef = refMake();
+            let stateMessage = PhoenixEvent(
+              "inspect_state",
+              "room:lobby",
+              {},
+              inspectionRef
+            );
+            socket.send(stateMessage);
+          } else {
+            console.error("Join failed!");
+          }
+        } else if (data.ref === inspectionRef) {
+          if (data.payload.status === "ok") {
+            insertPlayersBombsWalls(data.payload.response);
+          } else {
+            console.error("State retrival failed!");
+          }
+        }
+        break;
+      case "new_plr":
+        let new_player = JSON.stringify(data.payload);
+        universe.new_player(new_player);
+        break;
+      case "new_turn":
+        if (data.payload.next_player === universe.host_id()) {
+          yourTurn = true;
+        }
+
+        insertPlayersBombsWalls(data.payload.new_state);
+
+        break;
+    }
+  });
 }

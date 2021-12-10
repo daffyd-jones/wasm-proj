@@ -6,12 +6,30 @@ defmodule Backend.Player do
   # so we have to create another module
   defmodule State do
     @derive {Jason.Encoder, except: []}
-    defstruct name: "",
-              uuid: nil,
-              pos: %{x: 0, y: 0},
+    defstruct id: nil,
+              x: 0,
+              y: 0,
               bombs: 10,
-              power: 10,
+              hp: 0,
               alive: true
+    
+    def from_map(%{
+      "id" => id,
+      "x" => x,
+      "y" => y,
+      "bombs" => bombs,
+      "hp" => hp,
+      "alive" => alive
+    }) do
+      %State{
+        id: id,
+        x: x,
+        y: y,
+        bombs: bombs,
+        hp: hp,
+        alive: alive
+      }
+    end
   end
 
   ### Public API ###
@@ -30,6 +48,10 @@ defmodule Backend.Player do
 
   def inspect(pid), do: GenServer.call(pid, :inspect)
 
+  def update_state(uuid, new_state) do
+    GenServer.cast(name(uuid), {:update_state, new_state})
+  end
+
   def update_pos(uuid, new_pos) do
     GenServer.cast(name(uuid), {:update_pos, new_pos})
   end
@@ -38,7 +60,7 @@ defmodule Backend.Player do
   
   @impl true
   def init(uuid) do
-    state = %State{uuid: uuid}
+    state = %State{id: uuid}
     IO.puts("New player process created with UUID #{uuid}.")
     
     {:ok, state}
@@ -50,8 +72,13 @@ defmodule Backend.Player do
   end
 
   @impl true
+  def handle_cast({:update_state, new_state}, _state) do
+    {:noreply, State.from_map(new_state)}
+  end
+
+  @impl true
   def handle_cast({:update_pos, %{"x" => x, "y" => y}}, state) do
-    new_state = %{state | pos: %{x: x, y: y}}
+    new_state = %{state | x: x, y: y}
     Endpoint.broadcast("room:lobby", "new_pos", new_state)
     {:noreply, new_state}
   end

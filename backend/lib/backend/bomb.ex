@@ -1,9 +1,13 @@
 defmodule Backend.Bomb do
-  # Not sure what to do for this yet..?????????????????????????
-  # Whatever :D
-
   @derive {Jason.Encoder, exclude: []}
-  defstruct pos: %{x: 0, y: 0},
-            power: 0
-            
+  defstruct x: 0,
+            y: 0,
+            power: 0,
+            timer: 0
+
+  def from_map(
+    %{"x" => x, "y" => y, "power" => power, "timer" => timer}
+  ) do
+    %Backend.Bomb{x: x, y: y, power: power, timer: timer}
+  end
 end

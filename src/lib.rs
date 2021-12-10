@@ -11,6 +11,7 @@ use rand::Rng;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
+mod connect;
 
 use wasm_bindgen::prelude::*;
 
@@ -134,6 +135,11 @@ impl Universe {
     pub fn set_players(&mut self, players: String) {
         let deserialized: Vec<Player> = serde_json::from_str(&players).unwrap();
         self.players_vec = deserialized;
+    }
+
+    pub fn add_player(&mut self, new_player: String) {
+        let deserialized: Player = serde_json::from_str(&new_player).unwrap();
+        self.players_vec.push(deserialized);
     }
 
     pub fn set_walls(&mut self, walls: String) {

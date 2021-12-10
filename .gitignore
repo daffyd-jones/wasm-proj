@@ -5,8 +5,5 @@ bin/
 pkg/
 wasm-pack.log
 www/
-<<<<<<< HEAD
 **/*.swp
-=======
 .idea/
->>>>>>> ben-player-bomb
