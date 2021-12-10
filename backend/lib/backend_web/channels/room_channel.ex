@@ -33,7 +33,6 @@ defmodule BackendWeb.RoomChannel do
     # that a new player just connected
     broadcast socket, "new_plr", state
 
-    # TODO: Send client the state of all players + game
     {:noreply, socket}
   end
 
@@ -59,8 +58,7 @@ defmodule BackendWeb.RoomChannel do
     case State.finish_turn(socket.assigns.uuid, payload) do
       :not_your_turn -> nil
       next_player -> 
-        broadcast_from socket, "new_turn",
-          # sending status for testing purposes
+        broadcast socket, "new_turn",
           %{next_player: next_player, new_state: State.inspect()}
     end
     

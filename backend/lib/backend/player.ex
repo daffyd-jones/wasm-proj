@@ -7,8 +7,8 @@ defmodule Backend.Player do
   defmodule State do
     @derive {Jason.Encoder, except: []}
     defstruct id: nil,
-              x: 0,
-              y: 0,
+              x: 1,
+              y: 1,
               bombs: 10,
               hp: 0,
               alive: true

@@ -108,29 +108,55 @@ function socketEvents() {
 
   socket.addEventListener("message", event => {
     let data = JSON.parse(event.data);
+
+    console.log(data);
     switch (data.event) {
       case "phx_reply":
         if (!joined && data.ref === joinResponseRef) {
           if (data.payload.status === "ok") {
             // Join confirmed.
             joined = true;
-            inspectionRef = refMake();
-            let stateMessage = PhoenixEvent("inspect_state", "room:lobby", {}, inspectionRef);
-            socket.send(stateMessage);
           } else {
             console.error("Join failed!");
           }
-        } else if (data.ref === inspectionRef) {
-          if (data.payload.status === "ok") {
-            insertPlayersBombsWalls(data.payload.response);
-          } else {
-            console.error("State retrival failed!");
+        //} else if (data.ref === inspectionRef) {
+        } else {
+
+          const payload = data.payload;
+          // Response for "inspect_state"
+          if (payload.status === "ok" && payload.response.players) {
+            const state = data.payload.response;
+            console.log(state.players.length);
+            console.log("State retrieved");
+            
+            if (state.players.length !== 1) {
+              insertPlayersBombsWalls(state);
+            } else {
+              yourTurn = true;
+              // Dumb hack so the first client saves the state to the server
+              // first
+              const pbw = extractPlayersBombsWalls();
+              const turnMessage = PhoenixEvent("finish_turn", "room:lobby", pbw, refMake());
+              socket.send(turnMessage);
+            }
           }
         }
+
         break;
       case "new_plr":
+        // If the new player happens to be the current client
+        if (data.payload.id == universe.host_id()) {
+          const stateMessage = PhoenixEvent("inspect_state", "room:lobby", {}, refMake());
+          socket.send(stateMessage);
+          break; 
+        }
+
         let new_player = JSON.stringify(data.payload);
         universe.add_player(new_player);
+        drawGrid();
+        drawWalls(walls);
+        drawPlayers(players);
+        drawBombs(bombs);
         break;
       case "new_turn":
         if (data.payload.next_player === universe.host_id()) {
@@ -138,7 +164,15 @@ function socketEvents() {
         }
 
         insertPlayersBombsWalls(data.payload.new_state);
-
+        
+        walls = JSON.parse(universe.walls());
+        bombs = JSON.parse(universe.bombs());
+        players = JSON.parse(universe.players());
+        
+        drawGrid();
+        drawWalls(walls);
+        drawPlayers(players);
+        drawBombs(bombs);
         break;
     }
   });
@@ -231,7 +265,8 @@ function setEventListener() {
   window.addEventListener(
     "keydown",
     function (event) {
-      
+      //if (!yourTurn) return;
+
       if (event.defaultPrevented) {
         return;
       }
@@ -307,6 +342,7 @@ function setEventListener() {
       }
       event.preventDefault();
       
+      // Successful turn
       if (!yourTurn) {
         let pbw = extractPlayersBombsWalls();
         let turnMessage = PhoenixEvent("finish_turn", "room:lobby", pbw, refMake());
