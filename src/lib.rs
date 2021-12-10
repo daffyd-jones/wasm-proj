@@ -172,19 +172,19 @@ impl Universe {
         let players = self.players_vec.clone();
 
         for w in walls.iter() {
-            if w.x() == row && w.y() == col && w.is_alive() {
+            if w.x() == col && w.y() == row && w.is_alive() {
                 wall_check = true;
             }
         }
 
         for b in bombs.iter() {
-            if b.x() == row && b.y() == col {
+            if b.x() == col && b.y() == row {
                 bomb_check = true;
             }
         }
 
         for p in players.iter() {
-            if p.x() == row && p.y() == col {
+            if p.x() == col && p.y() == row {
                 player_check = true;
             }
         }
@@ -397,19 +397,19 @@ impl Universe {
                 }
                 // add destructible walls
                 else if i != 1 && i != width - 2 && j != 1 && j != height - 2 {
-                    // let rand_no_wall_i = rng.gen_range(2..width - 2);
-                    // let rand_no_wall_j = rng.gen_range(2..height - 2);
-                    // if i != rand_no_wall_i && j != rand_no_wall_j {
+                    let rand_no_wall_i = rng.gen_range(2..width - 2);
+                    let rand_no_wall_j = rng.gen_range(2..height - 2);
+                    if i != rand_no_wall_i && j != rand_no_wall_j {
                         walls_vec.push(WallStruct::new(i, j, true))
-                    // }
+                    }
                 }
             }
         }
 
         Universe {
             host_id: num,
-            width: 13,
-            height: 13,
+            width: 33,
+            height: 33,
             cells,
             bombs_vec,
             players_vec,
