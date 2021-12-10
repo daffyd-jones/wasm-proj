@@ -1,18 +1,40 @@
 import { Universe, Cell } from "wasm-proj";
+import { memory } from "../pkg/wasm_proj_bg";
 
 const CELL_SIZE = 25; // px
 const GRID_COLOR = "#CCCCCC";
-const DEAD_COLOR = "#FFFFFF";
-const ALIVE_COLOR = "#000000";
-const BLOCK_COLOR = "#DE3163";
-const ANTD_COLOR = "#DFFF00";
-const ANTL_COLOR = "#40E0D0";
-const ANTR_COLOR = "#CCCCFF";
+const GRID_FILL = "2e7700";
+
+// Load images
+const playerImgOne = new Image();
+playerImgOne.src = "./images/player1.png";
+const playerImgTwo = new Image();
+playerImgTwo.src = "./images/player2.png";
+const bombOne = new Image();
+bombOne.src = "./images/bomb1.png";
+const bombTwo = new Image();
+bombTwo.src = "./images/bomb2.png";
+const bombThree = new Image();
+bombThree.src = "./images/bomb3.png";
+const bombFour = new Image();
+bombFour.src = "./images/bomb4.png";
+const bombFive = new Image();
+bombFive.src = "./images/bomb5.png";
+const wallImgDes = new Image();
+wallImgDes.src = "./images/wall-destructable.png";
+const wallImgSolid = new Image();
+wallImgSolid.onload = start;
+wallImgSolid.src = "./images/wall-solid.png";
 
 // Construct the universe, and get its width and height.
 const universe = Universe.new();
 const width = universe.width();
 const height = universe.height();
+
+// Get initial walls, players, and bombs
+let walls = JSON.parse(universe.walls());
+let players = JSON.parse(universe.players());
+let bombs = JSON.parse(universe.bombs());
 
 // Give the canvas room for all of our cells and a 1px border
 // around each of them.
@@ -30,13 +52,6 @@ let joined = false;
 const joinResponseRef = refMake();
 let yourTurn = false;
 let inspectionRef = 0;
-
-
-// const renderLoop = () => {
-
-//   drawGrid();
-//   drawCells();
-// };
 
 const drawGrid = () => {
   ctx.beginPath();
@@ -57,165 +72,17 @@ const drawGrid = () => {
   ctx.stroke();
 };
 
-import { memory } from "../pkg/wasm_proj_bg";
-
-// ...
-
 const getIndex = (row, column) => {
   return row * width + column;
 };
 
-const drawCells = () => {
-  // const cellsPtr = universe.cells();
-  // const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
-
-  // ctx.beginPath();
-
-  // for (let row = 0; row < height; row++) {
-  //   for (let col = 0; col < width; col++) {
-  //     const idx = getIndex(row, col);
-
-  //     // ctx.fillStyle = cells[idx] === Cell.Empty
-  //     //   ? DEAD_COLOR
-  //     //   : ALIVE_COLOR;
-
-  //     switch (cells[idx]) {
-  // 			case Cell.Empty:
-  // 				ctx.fillStyle = DEAD_COLOR;
-  // 				break;
-  // 			case Cell.Player:
-  // 				ctx.fillStyle = ALIVE_COLOR;
-  //       	break;	
-  // 			case Cell.Block:
-  //         ctx.fillStyle = BLOCK_COLOR;
-  //         break;
-  // 			default:
-  // 				ctx.fillStyle = "#FFBF00";
-  // 		}
-
-  //     ctx.fillRect(
-  //       col * (CELL_SIZE + 1) + 1,
-  //       row * (CELL_SIZE + 1) + 1,
-  //       CELL_SIZE,
-  //       CELL_SIZE
-  //     );
-  //   }
-  // }
-
-  // ctx.stroke();
-};
-
-
-
-function setEventListener() {
-  window.addEventListener("keydown", function (event) {
-    if (!yourTurn) return;
-
-    if (event.defaultPrevented) {
-      return;
-    }
-
-    switch (event.key) {
-      case "ArrowDown":
-        console.log("arrow down");
-        const dres = universe.down_move();
-        switch (dres) {
-          case "fail":
-            console.log("move failed, cell occupied");
-            break;
-          case "pass":
-            console.log("move successful");
-            yourTurn = false;
-            break;
-        }
-        break;
-      case "ArrowUp":
-        console.log("arrow up");
-        const ures = universe.up_move();
-        switch (ures) {
-          case "fail":
-            console.log("move failed, cell occupied");
-            break;
-          case "pass":
-            console.log("move successful");
-            yourTurn = false;
-            break;
-        }
-        break;
-      case "ArrowLeft":
-        console.log("arrow left");
-        const lres = universe.left_move();
-        switch (lres) {
-          case "fail":
-            console.log("move failed, cell occupied");
-            break;
-          case "pass":
-            console.log("move successful");
-            yourTurn = false;
-            break;
-        }
-        break;
-      case "ArrowRight":
-        console.log("arrow right");
-        const rres = universe.right_move();
-        switch (rres) {
-          case "fail":
-            console.log("move failed, cell occupied");
-            break;
-          case "pass":
-            console.log("move successful");
-            yourTurn = false;
-            break;
-        }
-        break;
-      case "b":
-        console.log("space");
-        const bres = universe.bomb_move();
-        switch (bres) {
-          case "fail":
-            console.log("move failed, cell occupied");
-            break;
-          case "pass":
-            console.log("move successful");
-            yourTurn = false;
-            break;
-        }
-        break;
-      default:
-        console.log(event.key);
-        return;
-    }
-    event.preventDefault();
-
-    // If a move was successfully made...
-    if (!yourTurn) {
-      let pbw = extractPlayersBombsWalls();
-      let turnMessage = PhoenixEvent("finish_turn", "room:lobby", JSON.stringify(pbw), refMake());
-      socket.send(turnMessage);
-    }
-
-    const walls = universe.walls();
-    const bombs = universe.bombs();
-    const players = universe.players();
-    console.log(walls);
-    console.log(bombs);
-    console.log(players);
-    drawGrid();
-    drawCells();
-    // requestAnimationFrame(renderLoop);
-
-    // UNCOMMENT THE FOLLOWING IN CASE OF TURN JAMMING:
-    // yourTurn = true;
-  }, true);
-}
-
 function PhoenixEvent(event, topic, payload, ref) {
-  return {
+  return JSON.stringify({
     event: event,
     topic: topic,
     payload: payload,
     ref: ref,
-  }
+  });
 }
 
 function extractPlayersBombsWalls() {
@@ -235,7 +102,7 @@ function insertPlayersBombsWalls(new_state) {
 function socketEvents() {
   socket.addEventListener("open", e => {
     console.log("Attempting join...");
-    let message = PhoenixEvent("phx_join", "room:lobby", JSON.stringify({ uuid: universe.host_id() }), joinResponseRef);
+    let message = PhoenixEvent("phx_join", "room:lobby", { uuid: universe.host_id() }, joinResponseRef);
     socket.send(message);
   });
 
@@ -276,8 +143,196 @@ function socketEvents() {
     }
   });
 }
-setEventListener();
-universe.tick();
-drawGrid();
-drawCells();
-// requestAnimationFrame(renderLoop);
+
+const clearGrid = () => {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+};
+
+const drawWalls = (walls) => {
+  walls.forEach((wall) => {
+    if (wall.alive) {
+      let row = wall.x;
+      let col = wall.y;
+
+      if (wall.destructible) {
+        ctx.drawImage(
+          wallImgDes,
+          row * (CELL_SIZE + 1) + 1,
+          col * (CELL_SIZE + 1) + 1
+        );
+      } else {
+        ctx.drawImage(
+          wallImgSolid,
+          row * (CELL_SIZE + 1) + 1,
+          col * (CELL_SIZE + 1) + 1
+        );
+      }
+    }
+  });
+};
+
+const drawPlayers = (players) => {
+  players.forEach((player) => {
+    if (player.alive) {
+      if (player.id != 2) {
+        ctx.drawImage(
+          playerImgOne,
+          player.x * (CELL_SIZE + 1) + 1,
+          player.y * (CELL_SIZE + 1) + 1
+        );
+      } else {
+        ctx.drawImage(
+          playerImgTwo,
+          player.x * (CELL_SIZE + 1) + 1,
+          player.y * (CELL_SIZE + 1) + 1
+        );
+      }
+    }
+  });
+};
+
+const drawBombs = (bombs) => {
+  bombs.forEach((bomb) => {
+    if (bomb.timer == 1) {
+      ctx.drawImage(
+        bombOne,
+        bomb.x * (CELL_SIZE + 1) + 1,
+        bomb.y * (CELL_SIZE + 1) + 1
+      );
+    } else if (bomb.timer == 2) {
+      ctx.drawImage(
+        bombTwo,
+        bomb.x * (CELL_SIZE + 1) + 1,
+        bomb.y * (CELL_SIZE + 1) + 1
+      );
+    } else if (bomb.timer == 3) {
+      ctx.drawImage(
+        bombThree,
+        bomb.x * (CELL_SIZE + 1) + 1,
+        bomb.y * (CELL_SIZE + 1) + 1
+      );
+    } else if (bomb.timer == 4) {
+      ctx.drawImage(
+        bombFour,
+        bomb.x * (CELL_SIZE + 1) + 1,
+        bomb.y * (CELL_SIZE + 1) + 1
+      );
+    } else if (bomb.timer == 5) {
+      ctx.drawImage(
+        bombFive,
+        bomb.x * (CELL_SIZE + 1) + 1,
+        bomb.y * (CELL_SIZE + 1) + 1
+      );
+    }
+  });
+};
+
+function setEventListener() {
+  window.addEventListener(
+    "keydown",
+    function (event) {
+      
+      if (event.defaultPrevented) {
+        return;
+      }
+
+      switch (event.key) {
+        case "ArrowDown":
+          console.log("arrow down");
+          const dres = universe.down_move();
+          switch (dres) {
+            case "fail":
+              console.log("move failed, cell occupied");
+              break;
+            case "pass":
+              console.log("move successful");
+              yourTurn = false;
+              break;
+          }
+          break;
+        case "ArrowUp":
+          console.log("arrow up");
+          const ures = universe.up_move();
+          switch (ures) {
+            case "fail":
+              console.log("move failed, cell occupied");
+              break;
+            case "pass":
+              console.log("move successful");
+              yourTurn = false;
+              break;
+          }
+          break;
+        case "ArrowLeft":
+          console.log("arrow left");
+          const lres = universe.left_move();
+          switch (lres) {
+            case "fail":
+              console.log("move failed, cell occupied");
+              break;
+            case "pass":
+              console.log("move successful");
+              yourTurn = false;
+              break;
+          }
+          break;
+        case "ArrowRight":
+          console.log("arrow right");
+          const rres = universe.right_move();
+          switch (rres) {
+            case "fail":
+              console.log("move failed, cell occupied");
+              break;
+            case "pass":
+              console.log("move successful");
+              yourTurn = false;
+              break;
+          }
+          break;
+        case "b":
+          console.log("space");
+          const bres = universe.bomb_move();
+          switch (bres) {
+            case "fail":
+              console.log("move failed, cell occupied");
+              break;
+            case "pass":
+              console.log("move successful");
+              break;
+          }
+          break;
+        default:
+          console.log(event.key);
+          return;
+      }
+      event.preventDefault();
+      
+      if (!yourTurn) {
+        let pbw = extractPlayersBombsWalls();
+        let turnMessage = PhoenixEvent("finish_turn", "room:lobby", pbw, refMake());
+        socket.send(turnMessage);
+      }
+
+      walls = JSON.parse(universe.walls());
+      bombs = JSON.parse(universe.bombs());
+      players = JSON.parse(universe.players());
+      console.log(walls);
+      // let occupied = JSON.parse(universe.occupy());
+      // console.log(occupied);
+      clearGrid();
+      drawGrid();
+      drawWalls(walls);
+      drawPlayers(players);
+      drawBombs(bombs);
+    },
+    true
+  );
+}
+
+function start() {
+  setEventListener();
+  universe.tick();
+  drawGrid();
+  drawWalls(walls);
+  drawPlayers(players);
+}

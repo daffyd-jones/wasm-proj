@@ -1,10 +1,13 @@
 mod utils;
+
 mod bomb;
 use bomb::BombStruct;
 mod wall;
 use wall::WallStruct;
 mod player;
 use player::Player;
+
+use rand::Rng;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
@@ -50,14 +53,14 @@ pub enum InputType {
 
 #[wasm_bindgen]
 pub struct Universe {
-    id: i32,
+    host_id: i32,
     width: u32,
     height: u32,
     cells: Vec<Cell>,
     bombs_vec: Vec<BombStruct>,
-    bombs_locations: Vec<BombGrid>,
     players_vec: Vec<Player>,
-    walls_vec: Vec<WallStruct>
+    walls_vec: Vec<WallStruct>,
+    occupy_check: Vec<bool>,
 }
 
 impl Universe {
@@ -71,6 +74,9 @@ impl Universe {
 #[wasm_bindgen]
 impl Universe {
     // ...
+    pub fn host_id(&self) -> i32 {
+        self.host_id
+    }
 
     pub fn width(&self) -> u32 {
         self.width
@@ -148,39 +154,49 @@ impl Universe {
         self.bombs_vec = deserialized;
     }
 
-
+    pub fn occupy(&self) -> String {
+        let serialized = serde_json::to_string(&self.occupy_check).unwrap();
+        serialized
+    }
 }
 
 impl Universe {
     // ...
 
 
-    fn occupied(&self, row: i32, col: i32) -> bool {
+    fn occupied(&mut self, col: i32, row: i32) -> bool {
         let mut bomb_check = false;
         let mut wall_check = false;
         let mut player_check = false;
+        let mut checks: Vec<bool> = Vec::new();
 
         let bombs = self.bombs_vec.clone();
         let walls = self.walls_vec.clone();
         let players = self.players_vec.clone();
 
         for w in walls.iter() {
-            if w.x() == col && w.y() == row {
+            if w.x() == row && w.y() == col {
                 wall_check = true;
             }
         }
 
         for b in bombs.iter() {
-            if b.x() == col && b.y() == row {
+            if b.x() == row && b.y() == col {
                 bomb_check = true;
             }
         }
 
         for p in players.iter() {
-            if p.x() == col && p.y() == row {
+            if p.x() == row && p.y() == col {
                 player_check = true;
             }
         }
+        
+        checks.push(bomb_check);
+        checks.push(wall_check);
+        checks.push(player_check);
+
+        self.occupy_check = checks;
         
         return wall_check || bomb_check || player_check;
     }
@@ -198,6 +214,34 @@ impl Universe {
 		adj_sqrs.push(cels[idx_d]);
 		adj_sqrs
 	}
+
+    fn bomb_here(&self, x: i32, y: i32) -> bool {
+        let bombs = self.bombs_vec.clone();
+        for b in bombs.iter() {
+            if b.x() == x && b.y() == y {
+                return true;
+            }
+        }
+        return false;
+    }
+ 
+    fn place_bomb(&mut self) -> bool {
+        let mut bombs = self.bombs_vec.clone();
+        let mut players = self.players_vec.clone();
+        for p in players.iter_mut() {
+            if p.id() == self.host_id {
+                if self.bomb_here(p.x(), p.y()) {
+                    return true;
+                }
+                let bomb = BombStruct::new(p.x(), p.y());
+                bombs.push(bomb);
+                p.drop_bomb();
+            }
+        }
+        self.players_vec = players;
+        self.bombs_vec = bombs;
+        return false;
+    }
 }
 
 #[wasm_bindgen]
@@ -208,13 +252,13 @@ impl Universe {
         let mut fail = false;
 
         for p in plyrs.iter_mut() {
-            if p.id() == self.id {
+            if p.id() == self.host_id {
                 match input {
                     InputType::Up if !self.occupied(p.x(), p.y() - 1) => p.up(),
                     InputType::Left if !self.occupied(p.x() - 1, p.y()) => p.left(),
                     InputType::Right if !self.occupied(p.x() + 1, p.y()) => p.right(),
-                    InputType::Down if !self.occupied(p.x(), p.y() - 1) => p.down(),
-                    InputType::Bomb => p.drop_bomb(),
+                    InputType::Down if !self.occupied(p.x(), p.y() + 1) => p.down(),
+                    InputType::Bomb => fail = self.place_bomb(),
                     _ => fail = true
                 }
             }
@@ -228,9 +272,13 @@ impl Universe {
 
         let mut plyrs = self.players_vec.clone();
         let mut walls = self.walls_vec.clone();
+        let mut bombs = self.bombs_vec.clone();
 
+        let mut dead_bombs: Vec<usize> = Vec::new();
+        let mut dead_walls: Vec<usize> = Vec::new();
+        let mut idx = 0;
         // tick down bombs
-        for b in self.bombs_vec.iter_mut() {
+        for b in bombs.iter_mut() {
             b.count_down();
             if b.timer() == 0 {
                 let affected_tiles = b.explosion_tiles();
@@ -251,60 +299,31 @@ impl Universe {
                         let wy = &walls[j].y();
                         if (wx, wy) == (x , y) {
                             walls[j].is_bombed();
+                            if !walls[j].is_alive() {
+                                dead_walls.push(j);
+                            }
                         }
                     }
                 } 
-                
-                
+
+                dead_bombs.push(idx);
             }
+            idx += 1;
         }
-        
+
+        for i in dead_bombs.iter() {
+            bombs.remove(*i);
+        }
+
+        for j in dead_walls.iter() {
+            walls.remove(*j);
+        }
+
+        self.bombs_vec = bombs;
         self.players_vec = plyrs;
         self.walls_vec = walls;
 
-        return String::from("pass");
-
-        // let mut next = self.cells.clone();
-
-        // for row in 0..self.height {
-        //     for col in 0..self.width {
-        //         let idx = self.get_index(row, col);
-        //         let cell = self.cells[idx];
-                // let mut adj_sqrs: Vec<Cell> = self.neighbors(row, col); // < --- self.neighbors
-				// let u = adj_sqrs.pop().unwrap();
-				// let l = adj_sqrs.pop().unwrap();
-				// let r = adj_sqrs.pop().unwrap();
-				// let d = adj_sqrs.pop().unwrap();
-                // let live_neighbors = self.live_neighbor_count(row, col);
-                
-                // let walls = self.walls_vec.clone();
-                // let bombs = self.bombs_vec.clone();
-                // let players = self.players_vec.clone();
-
-                // for w in walls.iter() {
-                //     if w.y() == row && w.x() == col {
-
-                //     }
-                // }
-
-
-                // let next_cell = match (u, l, r, d, input, cell) {
-                //     (Cell::Player, _, _, _, InputType::Up, _) => Cell::Player,
-                //     (_, Cell::Player, _, _, InputType::Left, _) => Cell::Player,
-                //     (_, _, Cell::Player, _, InputType::Right, _) => Cell::Player,
-                //     (_, _, _, Cell::Player, InputType::Down, _) => Cell::Player,
-                //     (_, _, _, _, _, Cell::Player) => Cell::Empty,
-                //     (_, _, _, _, _, cell) => cell,
-                // };
-
-                // next[idx] = next_cell;
-        //     }
-        // }
-
-        // self.cells = next;
-
-
-        
+        return String::from("pass"); 
     }
 
     // ...
@@ -333,8 +352,8 @@ impl Universe {
     // ...
 
     pub fn new() -> Universe {
-        let width = 32;
-        let height = 32;
+        let width = 33;
+        let height = 33;
 
         let cells = (0..width * height)
             .map(|i| {
@@ -347,21 +366,17 @@ impl Universe {
                 }
             })
             .collect();
-
-        let bombs_locations = (0..width * height)
-            .map(|i| {
-                BombGrid::Empty
-            })
-            .collect();
         
         let bombs_vec: Vec<BombStruct> = Vec::new();
-        let host_player = Player::new(1, 24, 24, 10);
-        let guest_player = Player::new(2, 40, 40, 10);
+        let occupy_check: Vec<bool> = Vec::new();
+
+        let mut rng = rand::thread_rng();
+        let num = rng.gen::<i32>();
+        let host_player = Player::new(num, 1, 1, 10);
+        let guest_player = Player::new(2, 31, 31, 10);
         let mut players_vec: Vec<Player> = Vec::new(); {}
         players_vec.push(host_player);
         players_vec.push(guest_player);
-
-        let id = 1;
 
         // Construct the solid walls for the launch of universe
         let mut walls_vec: Vec<WallStruct> = Vec::new();
@@ -371,24 +386,38 @@ impl Universe {
 
         for i in 0..width {
             for j in 0.. height{
-                if (i == 0) || j==0 || i == width || j == height{
+                // add indestructible walls
+                if i == 0 || j == 0 || i == width - 1 || j == height - 1 {
                     walls_vec.push(WallStruct::new(i, j, false, true))
                 }
-                else if (i % 2 != 0) && (j % 2 != 0) {
-                    walls_vec.push(WallStruct::new(i, j, false, true))
+                else if (i % 2 == 0) && (j % 2 == 0) {
+                    // leave space around players with no walls
+                    if (i == 2 && (j == 2 || j == height - 3)) || (i == width - 3 && (j == 2 || j == height - 3)) {
+                        continue;
+                    } else {
+                        walls_vec.push(WallStruct::new(i, j, false, true))
+                    }
+                }
+                // add destructible walls
+                else if i != 1 && i != width - 2 && j != 1 && j != height - 2 {
+                    // let rand_no_wall_i = rng.gen_range(2..width - 2);
+                    // let rand_no_wall_j = rng.gen_range(2..height - 2);
+                    // if i != rand_no_wall_i && j != rand_no_wall_j {
+                        walls_vec.push(WallStruct::new(i, j, true, true))
+                    // }
                 }
             }
         }
 
         Universe {
-            id,
-            width: 32,
-            height: 32,
+            host_id: num,
+            width: 33,
+            height: 33,
             cells,
             bombs_vec,
-            bombs_locations,
             players_vec,
-            walls_vec
+            walls_vec,
+            occupy_check,
         }
     }
 
