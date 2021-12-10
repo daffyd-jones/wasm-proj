@@ -133,7 +133,6 @@ function socketEvents() {
           } else {
             console.error("Join failed!");
           }
-        //} else if (data.ref === inspectionRef) {
         } else if (data.ref === inspectionRef) {
           const payload = data.payload;
           // Response for "inspect_state"
@@ -212,6 +211,14 @@ function socketEvents() {
         drawWalls(walls);
         drawPlayers(players);
         drawBombs(bombs);
+        break;
+
+      case "plr_wins":
+        if (data.payload.winner_id === universe.host_id()) {
+          alert("You won!");
+        } else {
+          alert("You lost!");
+        }
         break;
     }
   });
