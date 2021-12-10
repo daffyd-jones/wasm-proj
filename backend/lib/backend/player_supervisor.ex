@@ -8,7 +8,22 @@ defmodule Backend.PlayerSupervisor do
 
   def start_player(uuid) do
     case DynamicSupervisor.start_child(__MODULE__, {Player, uuid}) do
-      {:ok, _} -> PlayerSequence.add_plr(uuid)
+      {:ok, _} -> 
+        PlayerSequence.add_plr(uuid)
+        # Changing the player's position depending on their
+        # turn order. Poor planning on my part makes everything
+        # scuffed hehe
+        pos = case PlayerSequence.inspect().players |> length() do
+          1 -> %{x: 1, y: 1}
+          2 -> %{x: 31, y: 31}
+          3 -> %{x: 1, y: 31}
+          4 -> %{x: 31, y: 1}
+        end
+
+        new_state = Map.merge(Player.inspect(uuid), pos)
+        
+        Player.set_pos(uuid, new_state)
+
       err -> err
     end
   end

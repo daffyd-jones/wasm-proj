@@ -1,6 +1,5 @@
 defmodule Backend.Player do
   use GenServer
-  alias BackendWeb.Endpoint
 
   # Structs are named after the module they are in
   # so we have to create another module
@@ -52,6 +51,10 @@ defmodule Backend.Player do
     GenServer.cast(name(uuid), {:update_state, new_state})
   end
 
+  def set_pos(uuid, new_pos) do
+    GenServer.cast(name(uuid), {:set_pos, new_pos})
+  end
+
   ### GenServer ###
   
   @impl true
@@ -70,5 +73,11 @@ defmodule Backend.Player do
   @impl true
   def handle_cast({:update_state, new_state}, _state) do
     {:noreply, State.from_map(new_state)}
+  end
+
+  @impl true
+  def handle_cast({:set_pos, new_pos}, state) do
+    new_state = Map.merge(state, new_pos)
+    {:noreply, new_state}
   end
 end
