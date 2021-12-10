@@ -348,8 +348,8 @@ impl Universe {
     // ...
 
     pub fn new() -> Universe {
-        let width = 13;
-        let height = 13;
+        let width = 33;
+        let height = 33;
 
         let cells = (0..width * height)
             .map(|i| {
