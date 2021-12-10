@@ -11,20 +11,25 @@ defmodule BackendWeb.RoomChannel do
   def join("room:lobby", payload, socket) do
     %{"uuid" => uuid} = payload
     
-    case PlayerSupervisor.start_player(uuid) do
-      :ok ->
+    # Max 4 players
+    if PlayerSequence.inspect().players |> length() > 3 do
+      {:error, "too many players"}
+    else
+      case PlayerSupervisor.start_player(uuid) do
+        :ok ->
         # Send self a message because we can't broadcast
         # before the socket fully joins
-        send(self(), :after_join)
+          send(self(), :after_join)
         # Attaches the UUID to the socket to associate the socket
         # with the newly created Player process
-        {:ok, assign(socket, :uuid, uuid)}
-      err ->
-        IO.inspect(err)
-        {:error, err}
+          {:ok, assign(socket, :uuid, uuid)}
+        err ->
+          IO.inspect(err)
+          {:error, err}
+      end
     end
   end
-  
+
   @impl true
   def handle_info(:after_join, socket) do
     state = Player.inspect(socket.assigns.uuid)
@@ -61,7 +66,7 @@ defmodule BackendWeb.RoomChannel do
         broadcast socket, "new_turn",
           %{next_player: next_player, new_state: State.inspect()}
     end
-    
+
     {:reply, :ok, socket}
   end
 
@@ -70,10 +75,10 @@ defmodule BackendWeb.RoomChannel do
     # Ignore the logging for update_pos since it
     # spams IEX
     Logger.disable(self())
-    
+
     %{"new_pos" => new_pos} = payload
     Player.update_pos(socket.assigns.uuid, new_pos)
-   
+
     {:noreply, socket}
   end
 
