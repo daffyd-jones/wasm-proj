@@ -134,7 +134,7 @@ function socketEvents() {
             console.error("Join failed!");
           }
         //} else if (data.ref === inspectionRef) {
-        } else {
+        } else if (data.ref === inspectionRef) {
           const payload = data.payload;
           // Response for "inspect_state"
           if (payload.status === "ok" && payload.response.players) {
