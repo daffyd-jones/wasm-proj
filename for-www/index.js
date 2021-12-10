@@ -42,7 +42,7 @@ const canvas = document.getElementById("game-of-life-canvas");
 canvas.height = (CELL_SIZE + 1) * height + 1;
 canvas.width = (CELL_SIZE + 1) * width + 1;
 
-const ctx = canvas.getContext('2d');
+const ctx = canvas.getContext("2d");
 
 const socket = new WebSocket("ws://localhost:4000/socket/websocket");
 
@@ -102,7 +102,12 @@ function insertPlayersBombsWalls(new_state) {
 function socketEvents() {
   socket.addEventListener("open", e => {
     console.log("Attempting join...");
-    let message = PhoenixEvent("phx_join", "room:lobby", { uuid: universe.host_id() }, joinResponseRef);
+    let message = PhoenixEvent(
+      "phx_join", 
+      "room:lobby", 
+      { uuid: universe.host_id() }, 
+      joinResponseRef
+    );
     socket.send(message);
   });
 
@@ -125,7 +130,6 @@ function socketEvents() {
           // Response for "inspect_state"
           if (payload.status === "ok" && payload.response.players) {
             const state = data.payload.response;
-            console.log(state.players.length);
             console.log("State retrieved");
             
             if (state.players.length !== 1) {
@@ -145,7 +149,12 @@ function socketEvents() {
               // Dumb hack so the first client saves the state to the server
               // first
               const pbw = extractPlayersBombsWalls();
-              const turnMessage = PhoenixEvent("finish_turn", "room:lobby", pbw, refMake());
+              const turnMessage = PhoenixEvent(
+                "finish_turn", 
+                "room:lobby", 
+                pbw, 
+                refMake()
+              );
               socket.send(turnMessage);
             }
           }
@@ -155,7 +164,12 @@ function socketEvents() {
       case "new_plr":
         // If the new player happens to be the current client
         if (data.payload.id == universe.host_id()) {
-          const stateMessage = PhoenixEvent("inspect_state", "room:lobby", {}, refMake());
+          const stateMessage = PhoenixEvent(
+            "inspect_state", 
+            "room:lobby", 
+            {}, 
+            refMake()
+          );
           socket.send(stateMessage);
           break; 
         }
@@ -210,13 +224,22 @@ const drawWalls = (walls) => {
           row * (CELL_SIZE + 1) + 1,
           col * (CELL_SIZE + 1) + 1
         );
+        // console.log("breakable");
+        // console.log(row + ", " + col);
       } else {
         ctx.drawImage(
           wallImgSolid,
           row * (CELL_SIZE + 1) + 1,
           col * (CELL_SIZE + 1) + 1
         );
+        // console.log("solid");
+        // console.log(row + ", " + col);
       }
+    } else {
+      let row = wall.x;
+      let col = wall.y;
+      console.log("dead");
+      console.log(row + ", " + col);
     }
   });
 };
@@ -361,16 +384,23 @@ function setEventListener() {
       // Successful turn
       if (!yourTurn) {
         let pbw = extractPlayersBombsWalls();
-        let turnMessage = PhoenixEvent("finish_turn", "room:lobby", pbw, refMake());
+        let turnMessage = PhoenixEvent(
+          "finish_turn", 
+          "room:lobby", 
+          pbw, 
+          refMake()
+        );
         socket.send(turnMessage);
       }
 
       walls = JSON.parse(universe.walls());
       bombs = JSON.parse(universe.bombs());
       players = JSON.parse(universe.players());
-      console.log(walls);
+      // console.log(walls);
       // let occupied = JSON.parse(universe.occupy());
       // console.log(occupied);
+      // let explosions = JSON.parse(universe.explosions());
+      // console.log(explosions);
       clearGrid();
       drawGrid();
       drawWalls(walls);
