@@ -47,6 +47,13 @@ defmodule BackendWeb.RoomChannel do
   end
 
   @impl true
+  def handle_in("win", payload, socket) do
+    %{"winner_id" => winner_id} = payload
+    broadcast socket, "plr_wins", winner_id
+    {:reply, ok, socket}
+  end
+
+  @impl true
   def handle_in("finish_turn", payload, socket) do
     case State.finish_turn(socket.assigns.uuid, payload) do
       :not_your_turn -> nil
