@@ -83,13 +83,22 @@ const drawWalls = (walls) => {
           row * (CELL_SIZE + 1) + 1,
           col * (CELL_SIZE + 1) + 1
         );
+        // console.log("breakable");
+        // console.log(row + ", " + col);
       } else {
         ctx.drawImage(
           wallImgSolid,
           row * (CELL_SIZE + 1) + 1,
           col * (CELL_SIZE + 1) + 1
         );
+        // console.log("solid");
+        // console.log(row + ", " + col);
       }
+    } else {
+      let row = wall.x;
+      let col = wall.y;
+      console.log("dead");
+      console.log(row + ", " + col);
     }
   });
 };
@@ -228,8 +237,10 @@ function setEventListener() {
       bombs = JSON.parse(universe.bombs());
       players = JSON.parse(universe.players());
       console.log(walls);
-      // let occupied = JSON.parse(universe.occupy());
-      // console.log(occupied);
+      let occupied = JSON.parse(universe.occupy());
+      console.log(occupied);
+      let explosions = JSON.parse(universe.explosions());
+      console.log(explosions);
       clearGrid();
       drawGrid();
       drawWalls(walls);

@@ -20,18 +20,26 @@ impl BombStruct {
   pub fn new(x: i32, y: i32) -> BombStruct {
     // Generate a random number between 1 and 5 to be the power and timer
     let mut rng = rand::thread_rng();
-    let rand_pow_time = rng.gen_range(1..6);
+    let rand_pow_time = rng.gen_range(2..7);
     BombStruct { x: x, y: y, power: rand_pow_time, timer: rand_pow_time + 1 }
   }
 
   // Get vector of tuples containing all exploded tiles.
-  pub fn explosion_tiles(&self) -> Vec<(i32, i32)> {
+  pub fn explosion_tiles(&self, width: u32, height: u32) -> Vec<(i32, i32)> {
     let mut v = Vec::new();
     for i in 0..(self.power) {
-      v.push((self.x, (self.y + i)));
-      v.push((self.x, (self.y - i)));
-      v.push(((self.x + i), self.y));
-      v.push(((self.x - i), self.y));
+      if self.y + i < height as i32 {
+        v.push((self.x, (self.y + i)));
+      }
+      if self.y - i > 0 {
+        v.push((self.x, (self.y - i)));
+      }
+      if self.x + i < width as i32 {
+        v.push(((self.x + i), self.y));
+      }
+      if self.x - i > 0 {
+        v.push(((self.x - i), self.y));
+      }
     }
 
     return v;

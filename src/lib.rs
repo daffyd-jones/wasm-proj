@@ -60,6 +60,7 @@ pub struct Universe {
     players_vec: Vec<Player>,
     walls_vec: Vec<WallStruct>,
     occupy_check: Vec<bool>,
+    explosions_vec: Vec<(i32, i32)>,
 }
 
 impl Universe {
@@ -149,6 +150,11 @@ impl Universe {
         let serialized = serde_json::to_string(&self.occupy_check).unwrap();
         serialized
     }
+
+    pub fn explosions(&self) -> String {
+        let serialized = serde_json::to_string(&self.explosions_vec).unwrap();
+        serialized
+    }
 }
 
 impl Universe {
@@ -166,7 +172,7 @@ impl Universe {
         let players = self.players_vec.clone();
 
         for w in walls.iter() {
-            if w.x() == row && w.y() == col {
+            if w.x() == row && w.y() == col && w.is_alive() {
                 wall_check = true;
             }
         }
@@ -272,8 +278,8 @@ impl Universe {
         for b in bombs.iter_mut() {
             b.count_down();
             if b.timer() == 0 {
-                let affected_tiles = b.explosion_tiles();
-                // TODO: check players positions and call their lose_hp() if they're hit
+                let affected_tiles = b.explosion_tiles(self.width, self.height);
+                self.explosions_vec = b.explosion_tiles(self.width, self.height);
                 for (x, y) in affected_tiles.iter() {
                     // self.players_vec = self.players_vec.iter()
                     //     .map(|&i| if i.space(x, y) {i.lose_hp()}).collect();
@@ -284,15 +290,14 @@ impl Universe {
                             plyrs[i].lose_hp();
                         }
                     }
-                    // TODO: check walls (julie working on this?)
                     for j in 0..walls.len(){
                         let wx = &walls[j].x();
                         let wy = &walls[j].y();
                         if (wx, wy) == (x , y) {
                             walls[j].is_bombed();
-                            if !walls[j].is_alive() {
-                                dead_walls.push(j);
-                            }
+                            // if !walls[j].is_alive() {
+                            //     dead_walls.push(j);
+                            // }
                         }
                     }
                 } 
@@ -306,9 +311,9 @@ impl Universe {
             bombs.remove(*i);
         }
 
-        for j in dead_walls.iter() {
-            walls.remove(*j);
-        }
+        // for j in dead_walls.iter() {
+        //     walls.remove(*j);
+        // }
 
         self.bombs_vec = bombs;
         self.players_vec = plyrs;
@@ -343,8 +348,8 @@ impl Universe {
     // ...
 
     pub fn new() -> Universe {
-        let width = 33;
-        let height = 33;
+        let width = 13;
+        let height = 13;
 
         let cells = (0..width * height)
             .map(|i| {
@@ -360,6 +365,7 @@ impl Universe {
         
         let bombs_vec: Vec<BombStruct> = Vec::new();
         let occupy_check: Vec<bool> = Vec::new();
+        let explosions_vec: Vec<(i32, i32)> = Vec::new();
 
         let mut rng = rand::thread_rng();
         let num = rng.gen::<i32>();
@@ -379,14 +385,14 @@ impl Universe {
             for j in 0.. height{
                 // add indestructible walls
                 if i == 0 || j == 0 || i == width - 1 || j == height - 1 {
-                    walls_vec.push(WallStruct::new(i, j, false, true))
+                    walls_vec.push(WallStruct::new(i, j, false))
                 }
                 else if (i % 2 == 0) && (j % 2 == 0) {
                     // leave space around players with no walls
                     if (i == 2 && (j == 2 || j == height - 3)) || (i == width - 3 && (j == 2 || j == height - 3)) {
                         continue;
                     } else {
-                        walls_vec.push(WallStruct::new(i, j, false, true))
+                        walls_vec.push(WallStruct::new(i, j, false))
                     }
                 }
                 // add destructible walls
@@ -394,7 +400,7 @@ impl Universe {
                     // let rand_no_wall_i = rng.gen_range(2..width - 2);
                     // let rand_no_wall_j = rng.gen_range(2..height - 2);
                     // if i != rand_no_wall_i && j != rand_no_wall_j {
-                        walls_vec.push(WallStruct::new(i, j, true, true))
+                        walls_vec.push(WallStruct::new(i, j, true))
                     // }
                 }
             }
@@ -402,13 +408,14 @@ impl Universe {
 
         Universe {
             host_id: num,
-            width: 33,
-            height: 33,
+            width: 13,
+            height: 13,
             cells,
             bombs_vec,
             players_vec,
             walls_vec,
             occupy_check,
+            explosions_vec,
         }
     }
 
