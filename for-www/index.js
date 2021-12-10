@@ -281,32 +281,32 @@ const drawBombs = (bombs) => {
   }
   bombs.forEach((bomb) => {
     console.log(bomb.timer)
-    if (bomb.timer == 1) {
+    if (Math.ceil(bomb.timer/2) == 1) {
       wasOne = true;
       ctx.drawImage(
         bombOne,
         bomb.x * (CELL_SIZE + 1) + 1,
         bomb.y * (CELL_SIZE + 1) + 1
       );
-    } else if (bomb.timer == 2) {
+    } else if (Math.ceil(bomb.timer/2) == 2) {
       ctx.drawImage(
         bombTwo,
         bomb.x * (CELL_SIZE + 1) + 1,
         bomb.y * (CELL_SIZE + 1) + 1
       );
-    } else if (bomb.timer == 3) {
+    } else if (Math.ceil(bomb.timer/2) == 3) {
       ctx.drawImage(
         bombThree,
         bomb.x * (CELL_SIZE + 1) + 1,
         bomb.y * (CELL_SIZE + 1) + 1
       );
-    } else if (bomb.timer == 4) {
+    } else if (Math.ceil(bomb.timer/2) == 4) {
       ctx.drawImage(
         bombFour,
         bomb.x * (CELL_SIZE + 1) + 1,
         bomb.y * (CELL_SIZE + 1) + 1
       );
-    } else if (bomb.timer == 5) {
+    } else if (Math.ceil(bomb.timer/2) == 5) {
       ctx.drawImage(
         bombFive,
         bomb.x * (CELL_SIZE + 1) + 1,

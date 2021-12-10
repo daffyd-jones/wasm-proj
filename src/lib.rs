@@ -135,11 +135,6 @@ impl Universe {
         serialized
     }
 
-    // pub fn host_id_ser(&self) -> String {
-    //     let serialized = serde_json::to_string(&self.host_id).unwrap();
-    //     serialized
-    // }
-
     pub fn set_players(&mut self, players: String) {
         let deserialized: Vec<Player> = serde_json::from_str(&players).unwrap();
         self.players_vec = deserialized;
