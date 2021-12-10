@@ -173,11 +173,12 @@ function socketEvents() {
       case "new_plr":
         // If the new player happens to be the current client
         if (data.payload.id == universe.host_id()) {
+          inspectionRef = refMake();
           const stateMessage = PhoenixEvent(
             "inspect_state", 
             "room:lobby", 
             {}, 
-            refMake()
+            inspectionRef
           );
           socket.send(stateMessage);
           break; 
