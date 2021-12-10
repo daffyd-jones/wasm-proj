@@ -8,12 +8,8 @@ const GRID_FILL = "2e7700";
 // Load images
 let playerImgOne = new Image();
 playerImgOne.src = "./images/player1.png";
-const playerImgOneDead = new Image();
-playerImgOneDead.src = "./images/player1-dead.png";
 let playerImgTwo = new Image();
 playerImgTwo.src = "./images/player2.png";
-const playerImgTwoDead = new Image();
-playerImgTwoDead.src = "./images/player2-dead.png";
 const bombOne = new Image();
 bombOne.src = "./images/bomb1.png";
 const bombTwo = new Image();
@@ -34,6 +30,9 @@ const bombSound = new sound("sounds/bomb.wav");
 const bPlant = new sound("sounds/plant.wav");
 const background = new sound("sounds/background.mp3");
 let wasOne = false;
+
+let win = false;
+let lose = false;
 
 // Construct the universe, and get its width and height.
 const universe = Universe.new();
@@ -363,11 +362,15 @@ function setEventListener() {
               break;
             case "lose":
               console.log("you lose");
-              playerImgOne = playerImgOneDead;
+              const playerImgOne = new Image();
+              playerImgOne.src = "./images/player1-dead.png";
+              lose = true;
               break;
             case "win":
               console.log("you win");
-              playerImgTwo = playerImgTwoDead;
+              const playerImgTwo = new Image();
+              playerImgTwo.src = "./images/player2-dead.png";
+              win = true;
               break;
           }
           break;
@@ -385,11 +388,15 @@ function setEventListener() {
               break;
             case "lose":
               console.log("you lose");
-              playerImgOne = playerImgOneDead;
+              const playerImgOne = new Image();
+              playerImgOne.src = "./images/player1-dead.png";
+              lose = true;
               break;
             case "win":
               console.log("you win");
-              playerImgTwo = playerImgTwoDead;
+              const playerImgTwo = new Image();
+              playerImgTwo.src = "./images/player2-dead.png";
+              win = true;
               break;
           }
           break;
@@ -407,11 +414,15 @@ function setEventListener() {
               break;
             case "lose":
               console.log("you lose");
-              playerImgOne = playerImgOneDead;
+              const playerImgOne = new Image();
+              playerImgOne.src = "./images/player1-dead.png";
+              lose = true;
               break;
             case "win":
               console.log("you win");
-              playerImgTwo = playerImgTwoDead;
+              const playerImgTwo = new Image();
+              playerImgTwo.src = "./images/player2-dead.png";
+              win = true;
               break;
           }
           break;
@@ -429,11 +440,15 @@ function setEventListener() {
               break;
             case "lose":
               console.log("you lose");
-              playerImgOne = playerImgOneDead;
+              const playerImgOne = new Image();
+              playerImgOne.src = "./images/player1-dead.png";
+              lose = true;
               break;
             case "win":
               console.log("you win");
-              playerImgTwo = playerImgTwoDead;
+              const playerImgTwo = new Image();
+              playerImgTwo.src = "./images/player2-dead.png";
+              win = true;
               break;
           }
           break;
@@ -450,11 +465,15 @@ function setEventListener() {
               break;
             case "lose":
               console.log("you lose");
-              playerImgOne = playerImgOneDead;
+              const playerImgOne = new Image();
+              playerImgOne.src = "./images/player1-dead.png";
+              lose = true;
               break;
             case "win":
               console.log("you win");
-              playerImgTwo = playerImgTwoDead;
+              const playerImgTwo = new Image();
+              playerImgTwo.src = "./images/player2-dead.png";
+              win = true;
               break;
           }
           break;
@@ -463,6 +482,9 @@ function setEventListener() {
           return;
       }
       event.preventDefault();
+
+      console.log(win);
+      console.log(lose);
       
       // Successful turn
       if (!yourTurn) {
