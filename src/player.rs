@@ -56,7 +56,7 @@ impl Player {
   // lose life
   pub fn lose_hp(&mut self) {
     self.hp -= 1;
-    if self.hp == 0 {
+    if self.hp <= 0 {
       self.alive = false;
     }
   }
